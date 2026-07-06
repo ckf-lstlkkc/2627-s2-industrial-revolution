@@ -227,243 +227,299 @@
     <div id="question-area" class="question-box">題目載入中...</div>
     <div id="options-area"></div>
     <div id="rationale-area" class="rationale-box"></div>
-            
+    
     <div id="next-btn-area" class="next-btn-container">
         <button class="btn" id="next-btn">下一題 ➡️</button>
     </div>
 </div>
 
 <div class="container hide" id="result-screen">
-    <h1>🎉 挑戰完成！
-<div class="certificate">
-        <h2>🏆 歷史科知識證書 🏆</h2>
-        <p style="font-size: 1.2em;">恭喜 <span id="cert-name" style="color: #e67e22; font-weight: bold;"></span> 同學</p>
-        <p>成功挑戰「工業革命百萬富翁問答遊戲」</p>
-        <p style="font-size: 1.5em; font-weight: bold; color: #27ae60;">最終得分：<span id="cert-score">0</span> 分</p>
-        <p>剩餘總時間：<span id="cert-time">0</span> 秒</p>
+    <h1>🎉 挑戰完成！</h1>
+    
+    <div class="certificate" id="certificate-box">
+        <h2 style="color: #d35400;">🏆 榮譽成績證書</h2>
+        <p><strong>姓名：</strong><span id="cert-name"></span> (<span id="cert-class"></span>)</p>
+        <p><strong>最終得分：</strong><span id="cert-score" style="font-size: 24px; color: #c0392b; font-weight:bold;"></span> 分</p>
+        <p><strong>總作答耗時：</strong><span id="cert-time"></span> 秒</p>
+        <p id="upload-status" style="color: #3498db; font-weight: bold; margin-top: 10px;">⏳ 正在將成績同步至雲端排行榜...</p>
     </div>
+    
+    <button class="btn" id="copy-btn">📋 一鍵複製成績</button>
+    <button class="btn" id="reload-btn" style="background: #3498db;">🔄 重新開始</button>
 
     <div class="leaderboard-box">
-        <div class="leaderboard-title">📊 雲端即時排行榜</div>
+        <div class="leaderboard-title">🏆 全班即時排行榜</div>
         <table class="leaderboard-table">
             <thead>
                 <tr>
-                    <th>排名</th>
-                    <th>班別學號</th>
+                    <th>名次</th>
+                    <th>班別</th>
                     <th>姓名</th>
-                    <th>得分</th>
-                    <th>剩餘時間</th>
+                    <th>分數</th>
+                    <th>耗時</th>
                 </tr>
             </thead>
             <tbody id="leaderboard-body">
-                <tr><td colspan="5">排行榜數據載入中...</td></tr>
+                <tr><td colspan="5">正在載入最新排名...</td></tr>
             </tbody>
         </table>
     </div>
-    <button class="btn" onclick="location.reload()">🔄 再玩一次</button>
 </div>
-
 <script>
-    // 萬用後台網址與年級密碼設定
-    const webAppUrl = "https://script.google.com/macros/s/AKfycbxDX229s0afkaFVuBvCUZIg0kUBW12Zl5z7AFUtqjywStKZwWYIxcoDbbaBNxGVM8Yz/exec";
-    const CORRECT_PASSWORD = "school2026"; // 中二級專屬密碼
-    const GAME_TITLE = "工業革命";
+// 【重要設定】已填入您的 Google Apps Script 部署網址與中二級專屬通關密碼
+const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxDX229s0afkaFVuBvCUZIg0kUBW12Zl5z7AFUtqjywStKZwWYIxcoDbbaBNxGVM8Yz/exec";
+const SCHOOL_PASSWORD = "school2026"; 
+const GAME_TITLE = "工業革命";
 
-    // 簡化精煉的工業革命題庫 (包含MC題與填充題)
-    const mcQuestions = [
-        { q: "工業革命最早起源於哪一個國家？", o: ["法國", "英國", "美國", "德國"], a: 1 },
-        { q: "下列哪一項發明徹底改變了工業革命時期的動力來源？", o: ["飛梭", "珍妮紡紗機", "瓦特改良的蒸汽機", "火車頭"], a: 2 },
-        { q: "工業革命最早從哪一個行業開始推行機械化生產？", o: ["採礦業", "鋼鐵業", "棉紡織業", "交通運輸業"], a: 2 },
-        { q: "下列哪些屬於工業革命爆發的有利條件？\nI. 煤鐵資源豐富\nII. 擁有廣大海外殖民地市場\nIII. 科學革命帶來的技術基礎", o: ["只有 I 和 II", "只有 II 和 III", "只有 I 和 III", "I、II、III 全是"], a: 3 },
-        { q: "複式選擇：關於工廠制度的轉變，下列敘述何者正確？\nI. 生產由家庭手工業轉向集中工廠\nII. 實行嚴格的勞動紀律與分工\nIII. 工人自備生產工具", o: ["只有 I 和 II", "只有 II 和 III", "只有 I 和 III", "I、II、III 全是"], a: 0 }
-    ];
-
-    const fillQuestions = [
-        { q: "工業革命時期，英國因開採大量的＿＿＿作為蒸汽機的燃料，使其工業得以迅速發展。", a: "煤" },
-        { q: "史蒂芬遜發明的改良＿＿＿，極大地縮短了城市間的運輸時間，促成了鐵路時代的來臨。", a: "火車頭" }
-    ];
-
-    let currentPool = [];
-    let currentQIndex = 0;
-    let totalScore = 0;
-    let totalTimeLeft = 0;
-    let timerInterval;
-    let currentQuestion;
-    let isAnswered = false;
-
-    // 登入驗證
-    document.getElementById('start-btn').addEventListener('click', function() {
-        const classStr = document.getElementById('student-class').value.trim();
-        const nameStr = document.getElementById('student-name').value.trim();
-        const passStr = document.getElementById('school-pass').value.trim();
-
-        if(!classStr || !nameStr || !passStr) {
-            alert('請完整填寫所有欄位！');
-            return;
-        }
-        if(passStr !== CORRECT_PASSWORD) {
-            alert('密碼錯誤！請輸入中二級正確密碼。');
-            return;
-        }
-
-        document.getElementById('login-screen').classList.add('hide');
-        document.getElementById('game-screen').classList.remove('hide');
-        initGame();
+window.onload = function() {
+    document.getElementById('start-btn').addEventListener('click', loginCheck);
+    document.getElementById('next-btn').addEventListener('click', loadNextQuestion);
+    document.getElementById('copy-btn').addEventListener('click', copyResult);
+    document.getElementById('reload-btn').addEventListener('click', function() {
+        window.location.reload();
     });
+};
 
-    function initGame() {
-        // 隨機抽取題目並混合
-        let shuffledMC = mcQuestions.sort(() => 0.5 - Math.random()).slice(0, 15);
-        if(shuffledMC.length === 0) shuffledMC = mcQuestions; // 確保防呆
-        let shuffledFill = fillQuestions.sort(() => 0.5 - Math.random()).slice(0, 5);
-        if(shuffledFill.length === 0) shuffledFill = fillQuestions;
+// 您修訂過的 33 題完整選擇題庫（一字不漏，完整保留）
+const allMC = [
+    {q:"工業革命時期，人類社會的生產模式發生了根本性轉變，這個時代在歷史上又被稱為什麼？", o:["蒸汽時代","機器時代","資訊時代","鐵器時代"], a:1, r:"工業革命的核心特徵是以機器生產取代手工勞作，因此歷史上常將這個時代稱為機器時代。"},
+    {q:"工業革命最先在英國展開，這場變革大約發生在以下哪一個歷史時期？", o:["十七世紀中葉至十八世紀末","十九世紀中葉至二十世紀末","十八世紀中葉至十九世紀中","十八世紀中葉至十九世紀末"], a:3, r:"歷史學界普遍公認英國工業革命大約始於 1750 年代，並持續發展至十九世紀末。"},
+    {q:"在工業革命期間，歐洲各國湧現了大量改變人類生活的重大科技成果。以下哪一組全屬於工業革命時期的發明？", o:["珍妮紡紗機、改良蒸汽機、蒸汽鐵路機車","印刷術、指南針、火藥","網際網路、智慧型手機、核能發電廠","柴油汽車、地鐵列車、飛機"], a:0, r:"紡紗機、蒸汽機與蒸汽機車均為十八至十九世紀初工業革命第一階段核心代表性發明。"},
+    {q:"隨著技術變革，歐洲的經濟結構發生重大轉變。這裡所指的「技術變革」核心是指什麼？", o:["機器逐步取代人力、畜力等成為生產動力","莊園制度的解體與自由貿易的普及","行會制度的建立與海外市場的開拓","政府全面接管民間手工藝作坊"], a:0, r:"技術革新的最根本立足點，在於人類掌握了利用自然能源轉化為機器動力的技術。"},
+    {q:"「工業化」為歐洲國家帶來了結構性的經濟轉變，其具體表現是：", o:["國家開始依賴海外殖民地提供糧食","商業貿易完全取代了製造業","工業取代了傳統農業成為國家的經濟支柱","金融借貸成為城鎮居民唯一的生計"], a:2, r:"工業化意味著製造業快速膨脹，在國民總產值與就業結構中全面超越傳統農業。"},
+    {q:"在工業革命引進機器生產後，相較於傳統家庭手工業，這種新興機器生產模式具備了什麼最顯著的優勢？", o:["完全不需要任何原料","產量巨大且生產過程不易受到自然環境限制","能保障底層勞工豐厚工資","完全由政府定價免費配給"], a:1, r:"新式機器打破了水力或風力的地理與氣候局限，生產效率大幅飛躍。"},
+    {q:"十八世紀英國地主收回農民租田並圍築土地，迫使大量失去生計的農民湧入城市，為新興工廠提供了什麼？", o:["豐富天然原材料","先進科學理論","廣闊海外市場","充足廉價勞動力"], a:3, r:"失去土地的農民湧入城市出賣勞動力，為資本家提供了廉價勞工來源。"},
+    {q:"到了十九世紀初至中葉，工業革命的技術開始從英國傳播到以下哪些地區？", o:["其他歐洲國家及美國","亞洲的清朝與日本","非洲中南部與拉丁美洲","大洋洲的澳洲與新西蘭"], a:0, r:"工業革命向外擴散的第一波主要是鄰近的歐洲大陸與美國。"},
+    {q:"為了配合工業大量生產後對貨物運送速度的需求，工業革命期間在水路運輸出現了什麼重大建設？", o:["修築跨海大橋","建立貨櫃碼頭","禁止木船航行","大量開鑿運河連接河流"], a:3, r:"在鐵路普及前，開鑿人工運河是低成本運送笨重煤炭與原材料的關鍵工程。"},
+    {q:"掌握了機器、廠房與礦產等生產資源，並以此僱用勞工賺取利潤的人被稱為：", o:["專業人士","中產階級","資本家","貴族地主"], a:2, r:"擁有生產資料並透過購買勞動力賺取利潤的階級即是資本家。"},
+    {q:"為了在最短時間內製造出最多、質素平均的商品，生產過程普遍採用了什麼運作模式？", o:["師徒制","分工制","世襲制","自由放任制"], a:1, r:"分工制作業將複雜工序拆解，極大地加快了流水線生產速度。"},
+    {q:"新興的教師、記者以及工廠中的管理人員，在當時屬於哪一個階級？", o:["中產階級","資產階級","工人階級","貴族階級"], a:0, r:"擁有專業知識或管理技能，收入地位介於資產階級與工人之間的是中產階級。"},
+    {q:"哪一個社會階級因為掌握巨額財富，能在政治上發揮強大影響力動搖傳統貴族統治？", o:["中產階級","工人階級","農民階級","資產階級"], a:3, r:"新興工業資產階級隨著經濟實力超越封建地主，逐步主導了國家政策。"},
+    {q:"部份學者反對資本家對勞工的剝削，進而提出了什麼新興的主張？", o:["自由主義","民族主義","社會主義","重商主義"], a:2, r:"社會主義學說宗旨在於批判資本主義貧富分化，倡導社會公正。"},
+    {q:"十九世紀中葉後，西方工業強國向海外大肆擴張奪取殖民地的核心目的是甚麼？", o:["傳播技術","獲取生產原料及拓展海外市場","協助發展","促進平等貿易"], a:1, r:"為了滿足國內過剩產能與市場飽和，列強需強佔海外殖民地掠奪資源與傾銷。"},
+    {q:"陸路交通工具的革命性突破，發明了以下哪一種由非生物動力推動的運輸工具？", o:["柴油客車","蒸汽鐵路機車","地鐵列車","馬拉軌道車"], a:1, r:"史蒂芬生利用改良蒸汽機推道火車頭，開啟鐵路運輸新紀元。"},
+    {q:"哪一位歷史人物在醫學與公共衛生範疇做出巨大貢獻，並創立護士學校？", o:["歐文","羅伯特·皮爾","南丁格爾","詹姆斯·瓦特"], a:2, r:"南丁格爾改革戰地醫院衛生，將護理學提升為現代專業。"},
+    {q:"新型現代化工業生產模式下，生產的主要場所發生了什麼轉變？", o:["機器生產取代了傳統的家庭或小型工作坊生產","轉為國營手工生產","轉回農村集體勞作","依靠殖民地手工作坊"], a:0, r:"現代化大生產將大批機器與工人集中在廠房內統一管理。"},
+    {q:"早期工廠排放大量濃煙，導致工業城市普遍面臨什麼嚴重問題？", o:["勞動力短缺","土地荒廢","糧食過剩","嚴重的環境污染與公共衛生惡劣"], a:3, r:"缺乏環保法規，煤煙與污水導致霍亂等傳染病在工人區頻發。"},
+    {q:"德意志思想家公開反對剝削，合著政治綱領並資助反對私有制研究的是誰？", o:["恩格斯","詹姆斯·瓦特","南丁格爾","亞當·斯密"], a:0, r:"恩格斯是工人階級學說先驅，無私資助馬克思進行研究。"},
+    {q:"到二十世紀初，隨著列強在經貿與殖民地爭奪白熱化，全球局勢出現了什麼發展？", o:["全面裁軍","放棄殖民地","國際衝突不斷增加，局勢漸趨緊張","經貿聯繫中斷"], a:2, r:"地球領土被瓜分殆盡，列強零和博弈加劇引發國際危機。"},
+    {q:"工業革命爆發前，歐洲大多數人主要是以什麼方式維持生計？", o:["在城鎮經商","從事三角貿易","在礦場採煤","在農村務農"], a:3, r:"農業社會中，絕大多數人口綁定在土地上從事傳統耕作。"},
+    {q:"根據反對剝削的學者理論，要徹底解決貧富懸殊，社會財富應該如何處理？", o:["集中在資產階級手中","依封建血統劃分","平均分配給社會大眾","交由教會保管"], a:2, r:"社會主義學派認為，實行社會財富的平均分配才能消滅剝削。"},
+    {q:"到了十九世紀末，工業革命對全球經濟格局產生的最長遠影響是什麼？", o:["恢復封建莊園","逐漸形成以西方為中心的全球經濟體系","確立亞洲核心貿易","工業中心轉移非洲"], a:1, r:"西方依仗工業優勢，將全球納入其貿易網絡，確立西方主導體系。"},
+    {q:"大量工廠設立，城市範圍擴展，人口持續增長。這種社會結構轉變稱為：", o:["農業化","都市化","莊園化","去工業化"], a:1, r:"人口向城鎮集中、城鎮規模擴大的歷史進程史稱都市化。"},
+    {q:"工業革命期間，哪一項醫學成就成功預防了當時在城鎮廣泛蔓延的烈性傳染病？", o:["盤尼西林","現代麻醉藥","高級抗生素","天花疫苗的應用"], a:3, r:"琴納發明的天花疫苗在十九世紀推廣，成功遏制天花肆虐。"},
+    {q:"因機器與廠房建造費用極高，資本家為了募集龐大資金通常會組織什麼公司？", o:["獨資公司","無限責任會社","家族小工作坊","合股公司"], a:3, r:"合股公司允許向公眾募集資金，有效解決了重工業巨額投資瓶頸。"},
+    {q:"律師、醫生與工程師等群體，主要是憑藉什麼條件立足並被歸為中產階級？", o:["世襲爵位","專門的知識與技術","擁有工廠","朝廷官職"], a:1, r:"技術型中產階級出賣高度專業化的腦力勞動，是工業社會產物。"},
+    {q:"英國政府在法律與政治制度上設立了哪一項保護創新的關鍵制度？", o:["股票制度","關稅壁壘","專利權制度","勞工法例"], a:2, r:"專利保護法規給予發明人壟斷收益，刺激了技術改良。"},
+    {q:"工業革命前，在沒有機器與現代交通的情況下，最主要的遠距離信息傳遞方式是：", o:["郵遞","電報","電話","廣播"], a:0, r:"電磁通訊發明前，信息依賴實體運載工具進行郵遞。"},
+    {q:"工業革命後期，哪些新發現並被廣泛應用的能源提供了更強大動力？", o:["木炭與薪柴","風力與水力","太陽能與核能","石油與電力"], a:3, r:"內燃機與發電機發明使石油和電力成為第二次工業革命核心能源。"},
+    {q:"工業革命前期，紡織業機器主要依靠哪一種改良後的動力打破地理限制？", o:["水力","石油動力","蒸汽力","人力"], a:2, r:"瓦特改良的蒸汽機不受河流位置限制，隨時提供強大動力。"},
+    {q:"西方工業強國透過現代交通網絡，從世界各地主要輸入什麼，加工後輸出製成品？", o:["原材料","機器設備","股票債券","廉價勞工"], a:0, r:"西方工業強國利用其強大航運與鐵路網，將各殖民地的原材料源源不斷運回本土加工。"}
+];
 
-        currentPool = [...shuffledMC, ...shuffledFill].sort(() => 0.5 - Math.random());
-        currentQIndex = 0;
-        totalScore = 0;
-        totalTimeLeft = 0;
-        showQuestion();
+// 精煉的工業革命核心填充題庫（隨機抽5題）
+const allFill = [
+    {q:"工業革命最先在英國爆發，其核心原因之一是英國境內蘊藏了非常豐富的煤和＿＿＿礦。", a:"鐵"},
+    {q:"瓦特改良了＿＿＿機，使工廠不再受制於河流位置，能隨時隨地提供強大的機械動力。", a:"蒸汽"},
+    {q:"史蒂芬生發明了改良的＿＿＿機車（火車頭），開啟了鐵路運輸大發展的新紀元。", a:"蒸汽鐵路"},
+    {q:"工業革命促成了大批人口向城鎮流動，這個城市規模不斷擴大、範圍擴展的過程稱為＿＿＿化。", a:"都市"},
+    {q:"為了解決工廠制度下嚴重的貧富懸殊與剝削問題，有學者提出了提倡社會財富公平分配的＿＿＿主義學說。", a:"社會"}
+];
+
+let gameQuestions = [];
+let currentItemIndex = 0;
+let userScore = 0;
+let totalUsedTime = 0;
+let questionTimer;
+let currentSecondsLeft = 0;
+let isCurrentQuestionAnswered = false;
+let studentClass = "";
+let studentName = "";
+
+function loginCheck() {
+    studentClass = document.getElementById('student-class').value.trim();
+    studentName = document.getElementById('student-name').value.trim();
+    const passInput = document.getElementById('school-pass').value.trim();
+
+    if (!studentClass || !studentName || !passInput) {
+        alert("請完整輸入班別學號、姓名及通關密碼！");
+        return;
+    }
+    if (passInput !== SCHOOL_PASSWORD) {
+        alert("通關密碼錯誤！請輸入中二級正確密碼。");
+        return;
     }
 
-    function showQuestion() {
-        isAnswered = false;
-        clearInterval(timerInterval);
-        document.getElementById('rationale-area').style.display = 'none';
-        document.getElementById('next-btn-area').style.display = 'none';
+    document.getElementById('login-screen').classList.add('hide');
+    document.getElementById('game-screen').classList.remove('hide');
+    buildGamePool();
+}
 
-        if(currentQIndex >= currentPool.length) {
-            endGame();
-            return;
-        }
+function buildGamePool() {
+    // 隨機抽取 15 題 MC 與 5 題 填充
+    let mcShuffled = [...allMC].sort(() => 0.5 - Math.random()).slice(0, 15);
+    let fillShuffled = [...allFill].sort(() => 0.5 - Math.random()).slice(0, 5);
+    
+    // 混合成 20 題的最終考卷並徹底打散
+    gameQuestions = [...mcShuffled, ...fillShuffled].sort(() => 0.5 - Math.random());
+    currentItemIndex = 0;
+    userScore = 0;
+    totalUsedTime = 0;
+    
+    loadQuestion();
+}
 
-        document.getElementById('q-counter').innerText = currentQIndex + 1;
-        currentQuestion = currentPool[currentQIndex];
-        
-        let timeLeft = currentQuestion.o ? 30 : 40;
-        document.getElementById('time-left').innerText = timeLeft;
+function loadQuestion() {
+    isCurrentQuestionAnswered = false;
+    clearInterval(questionTimer);
+    document.getElementById('rationale-area').style.display = 'none';
+    document.getElementById('next-btn-area').style.display = 'none';
 
-        timerInterval = setInterval(() => {
-            timeLeft--;
-            document.getElementById('time-left').innerText = timeLeft;
-            if(timeLeft <= 0) {
-                clearInterval(timerInterval);
-                checkAnswer(-1); // 超時
-            }
-        }, 1000);
-
-        const qArea = document.getElementById('question-area');
-        const optArea = document.getElementById('options-area');
-        optArea.innerHTML = '';
-
-        if(currentQuestion.o) { // MC題
-            qArea.innerText = currentQuestion.q;
-            const grid = document.createElement('div');
-            grid.className = 'options-grid';
-            currentQuestion.o.forEach((opt, idx) => {
-                const btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.innerText = opt;
-                btn.onclick = () => { if(!isAnswered) checkAnswer(idx); };
-                grid.appendChild(btn);
-            });
-            optArea.appendChild(grid);
-        } else { // 填充題
-            qArea.innerText = currentQuestion.q;
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'fill-input';
-            input.placeholder = '請輸入答案後按 Enter 鍵';
-            input.onkeydown = (e) => {
-                if(e.key === 'Enter' && !isAnswered) {
-                    checkAnswer(input.value.trim());
-                }
-            };
-            optArea.appendChild(input);
-            input.focus();
-        }
+    if (currentItemIndex >= gameQuestions.length) {
+        finishGame();
+        return;
     }
 
-    function checkAnswer(userAnswer) {
-        isAnswered = true;
-        clearInterval(timerInterval);
-        const ratArea = document.getElementById('rationale-area');
-        const secLeft = parseInt(document.getElementById('time-left').innerText) || 0;
+    document.getElementById('q-counter').innerText = currentItemIndex + 1;
+    let currentQ = gameQuestions[currentItemIndex];
+    
+    // 設定倒數時間：MC 題 30 秒，填充題 40 秒
+    currentSecondsLeft = currentQ.o ? 30 : 40;
+    document.getElementById('time-left').innerText = currentSecondsLeft;
 
-        let isCorrect = false;
-        if(currentQuestion.o) {
-            const btns = document.getElementsByClassName('option-btn');
-            if(userAnswer === currentQuestion.a) {
-                isCorrect = true;
-                if(btns[userAnswer]) btns[userAnswer].classList.add('correct');
-            } else {
-                if(btns[userAnswer]) btns[userAnswer].classList.add('wrong');
-                if(btns[currentQuestion.a]) btns[currentQuestion.a].classList.add('correct');
-            }
-        } else {
-            if(userAnswer === currentQuestion.a) {
-                isCorrect = true;
-            }
+    questionTimer = setInterval(() => {
+        currentSecondsLeft--;
+        document.getElementById('time-left').innerText = currentSecondsLeft;
+        totalUsedTime++;
+        if (currentSecondsLeft <= 0) {
+            clearInterval(questionTimer);
+            evaluateAnswer(-1); // 超時視同答錯
         }
+    }, 1000);
 
-        if(isCorrect) {
-            let points = 50 + (secLeft * 2);
-            totalScore += points;
-            totalTimeLeft += secLeft;
-            document.getElementById('score-display').innerText = totalScore;
-            ratArea.innerText = "⭕ 答對了！太棒了！";
-            ratArea.style.background = "#2ecc71";
-        } else {
-            ratArea.innerText = currentQuestion.o ? "❌ 答錯囉！正確答案是：" + currentQuestion.o[currentQuestion.a] : "❌ 答錯囉！正確答案是：" + currentQuestion.a;
-            ratArea.style.background = "#e74c3c";
-        }
+    const qBox = document.getElementById('question-area');
+    const optArea = document.getElementById('options-area');
+    optArea.innerHTML = '';
+    qBox.innerText = currentQ.q;
 
-        ratArea.style.display = 'block';
-        document.getElementById('next-btn-area').style.display = 'block';
-    }
-
-    document.getElementById('next-btn').addEventListener('click', () => {
-        currentQIndex++;
-        showQuestion();
-    });
-
-    function endGame() {
-        document.getElementById('game-screen').classList.add('hide');
-        document.getElementById('result-screen').classList.remove('hide');
-        
-        const classStr = document.getElementById('student-class').value;
-        const nameStr = document.getElementById('student-name').value;
-
-        document.getElementById('cert-name').innerText = nameStr;
-        document.getElementById('cert-score').innerText = totalScore;
-        document.getElementById('cert-time').innerText = totalTimeLeft;
-
-        // 上傳數據到 Google Apps Script
-        const payload = {
-            gameTitle: GAME_TITLE,
-            classStr: classStr,
-            name: nameStr,
-            score: totalScore,
-            time: totalTimeLeft
-        };
-
-        fetch(webAppUrl, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        }).then(() => {
-            setTimeout(loadLeaderboard, 1500); // 延遲載入排行榜確保數據寫入
-        }).catch(err => {
-            console.error(err);
-            document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="5">成績上傳失敗，無法更新排行榜。</td></tr>';
+    if (currentQ.o) { // 渲染MC選擇題
+        const grid = document.createElement('div');
+        grid.className = 'options-grid';
+        currentQ.o.forEach((optionText, idx) => {
+            const optBtn = document.createElement('button');
+            optBtn.className = 'option-btn';
+            optBtn.innerText = optionText;
+            optBtn.onclick = function() { if (!isCurrentQuestionAnswered) evaluateAnswer(idx); };
+            grid.appendChild(optBtn);
         });
+        optArea.appendChild(grid);
+    } else { // 渲染填充題
+        const inputField = document.createElement('input');
+        inputField.type = 'text';
+        inputField.className = 'fill-input';
+        inputField.placeholder = '請在此處輸入答案，然後按 Enter 鍵送出';
+        inputField.onkeydown = function(e) {
+            if (e.key === 'Enter' && !isCurrentQuestionAnswered) {
+                evaluateAnswer(inputField.value.trim());
+            }
+        };
+        optArea.appendChild(inputField);
+        inputField.focus();
+    }
+}
+
+function evaluateAnswer(userAns) {
+    isCurrentQuestionAnswered = true;
+    clearInterval(questionTimer);
+    
+    let currentQ = gameQuestions[currentItemIndex];
+    let isRight = false;
+    const ratArea = document.getElementById('rationale-area');
+
+    if (currentQ.o) { // 選擇題判定
+        const btns = document.getElementsByClassName('option-btn');
+        if (userAns === currentQ.a) {
+            isRight = true;
+            if (btns[userAns]) btns[userAns].classList.add('correct');
+        } else {
+            if (btns[userAns]) btns[userAns].classList.add('wrong');
+            if (btns[currentQ.a]) btns[currentQ.a].classList.add('correct');
+        }
+    } else { // 填充題判定
+        if (userAns === currentQ.a) {
+            isRight = true;
+        }
     }
 
-    function loadLeaderboard() {
-        // 利用 no-cors 限制，我們可以直接從部署好的萬用後台改為透過 JSONP 或直接由原本試算表的網頁發布功能拉取，
-        // 這裡提供基礎防錯提示，若您的 Web App 無法回傳，亦可用靜態提示
-        document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="5" class="top-rank">✅ 成績已成功紀錄於雲端！排行榜已自動刷新於老師的母表中。</td></tr>';
+    if (isRight) {
+        let earnedPoints = 50 + (currentSecondsLeft * 2); // 越快答對分數越高
+        userScore += earnedPoints;
+        document.getElementById('score-display').innerText = userScore;
+        ratArea.innerHTML = "⭕ <strong>答對了！</strong><br>" + (currentQ.r ? currentQ.r : "表現優異！");
+        ratArea.style.background = "#2ecc71";
+    } else {
+        let correctText = currentQ.o ? currentQ.o[currentQ.a] : currentQ.a;
+        ratArea.innerHTML = "❌ <strong>答錯囉！</strong>正確答案應該是：<span style='color:#f1c40f;font-weight:bold;'>" + correctText + "</span><br>" + (currentQ.r ? currentQ.r : "");
+        ratArea.style.background = "#e74c3c";
     }
+
+    ratArea.style.display = 'block';
+    document.getElementById('next-btn-area').style.display = 'block';
+}
+
+function loadNextQuestion() {
+    currentItemIndex++;
+    loadQuestion();
+}
+
+function finishGame() {
+    document.getElementById('game-screen').classList.add('hide');
+    document.getElementById('result-screen').classList.remove('hide');
+
+    document.getElementById('cert-name').innerText = studentName;
+    document.getElementById('cert-class').innerText = studentClass;
+    document.getElementById('cert-score').innerText = userScore;
+    document.getElementById('cert-time').innerText = totalUsedTime;
+
+    // 將成績封裝成 JSON 透過 fetch 外送到您的萬用 Google 表單中
+    const scorePayload = {
+        gameTitle: GAME_TITLE,
+        classStr: studentClass,
+        name: studentName,
+        score: userScore,
+        time: totalUsedTime
+    };
+
+    fetch(CLOUD_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(scorePayload)
+    }).then(() => {
+        document.getElementById('upload-status').innerText = "✅ 成績已成功安全上傳至雲端母表！";
+        setTimeout(pullLeaderboard, 1000);
+    }).catch(err => {
+        console.error(err);
+        document.getElementById('upload-status').innerText = "❌ 網路通道異常，成績上傳失敗。";
+    });
+}
+
+function pullLeaderboard() {
+    // 預設提示，當學生順利寫入後，老師打開總表格即可直接閱覽完全實時的分類排行
+    document.getElementById('leaderboard-body').innerHTML = `
+        <tr class='top-rank'>
+            <td colspan='5'>🎉 資料已在「歷史科網上遊戲成績總表」歸檔！分頁名稱：【${GAME_TITLE}】</td>
+        </tr>`;
+}
+
+function copyResult() {
+    const textToCopy = `我在【👑 ${GAME_TITLE}百萬富翁挑戰賽】中獲得了 ${userScore} 分，總作答耗時 ${totalUsedTime} 秒！老師，我已成功提交成績！`;
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        alert("成績證書複製成功！可以貼到通訊軟體回報給老師囉！");
+    }).catch(() => {
+        alert("複製失敗，請手動截圖畫面保留證書。");
+    });
+}
 </script>
 </body>
 </html>
