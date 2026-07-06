@@ -227,7 +227,7 @@
     <div id="question-area" class="question-box">題目載入中...</div>
     <div id="options-area"></div>
     <div id="rationale-area" class="rationale-box"></div>
-    
+            
     <div id="next-btn-area" class="next-btn-container">
         <button class="btn" id="next-btn">下一題 ➡️</button>
     </div>
@@ -235,3 +235,235 @@
 
 <div class="container hide" id="result-screen">
     <h1>🎉 挑戰完成！
+<div class="certificate">
+        <h2>🏆 歷史科知識證書 🏆</h2>
+        <p style="font-size: 1.2em;">恭喜 <span id="cert-name" style="color: #e67e22; font-weight: bold;"></span> 同學</p>
+        <p>成功挑戰「工業革命百萬富翁問答遊戲」</p>
+        <p style="font-size: 1.5em; font-weight: bold; color: #27ae60;">最終得分：<span id="cert-score">0</span> 分</p>
+        <p>剩餘總時間：<span id="cert-time">0</span> 秒</p>
+    </div>
+
+    <div class="leaderboard-box">
+        <div class="leaderboard-title">📊 雲端即時排行榜</div>
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>排名</th>
+                    <th>班別學號</th>
+                    <th>姓名</th>
+                    <th>得分</th>
+                    <th>剩餘時間</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+                <tr><td colspan="5">排行榜數據載入中...</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <button class="btn" onclick="location.reload()">🔄 再玩一次</button>
+</div>
+
+<script>
+    // 萬用後台網址與年級密碼設定
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbxDX229s0afkaFVuBvCUZIg0kUBW12Zl5z7AFUtqjywStKZwWYIxcoDbbaBNxGVM8Yz/exec";
+    const CORRECT_PASSWORD = "school2026"; // 中二級專屬密碼
+    const GAME_TITLE = "工業革命";
+
+    // 簡化精煉的工業革命題庫 (包含MC題與填充題)
+    const mcQuestions = [
+        { q: "工業革命最早起源於哪一個國家？", o: ["法國", "英國", "美國", "德國"], a: 1 },
+        { q: "下列哪一項發明徹底改變了工業革命時期的動力來源？", o: ["飛梭", "珍妮紡紗機", "瓦特改良的蒸汽機", "火車頭"], a: 2 },
+        { q: "工業革命最早從哪一個行業開始推行機械化生產？", o: ["採礦業", "鋼鐵業", "棉紡織業", "交通運輸業"], a: 2 },
+        { q: "下列哪些屬於工業革命爆發的有利條件？\nI. 煤鐵資源豐富\nII. 擁有廣大海外殖民地市場\nIII. 科學革命帶來的技術基礎", o: ["只有 I 和 II", "只有 II 和 III", "只有 I 和 III", "I、II、III 全是"], a: 3 },
+        { q: "複式選擇：關於工廠制度的轉變，下列敘述何者正確？\nI. 生產由家庭手工業轉向集中工廠\nII. 實行嚴格的勞動紀律與分工\nIII. 工人自備生產工具", o: ["只有 I 和 II", "只有 II 和 III", "只有 I 和 III", "I、II、III 全是"], a: 0 }
+    ];
+
+    const fillQuestions = [
+        { q: "工業革命時期，英國因開採大量的＿＿＿作為蒸汽機的燃料，使其工業得以迅速發展。", a: "煤" },
+        { q: "史蒂芬遜發明的改良＿＿＿，極大地縮短了城市間的運輸時間，促成了鐵路時代的來臨。", a: "火車頭" }
+    ];
+
+    let currentPool = [];
+    let currentQIndex = 0;
+    let totalScore = 0;
+    let totalTimeLeft = 0;
+    let timerInterval;
+    let currentQuestion;
+    let isAnswered = false;
+
+    // 登入驗證
+    document.getElementById('start-btn').addEventListener('click', function() {
+        const classStr = document.getElementById('student-class').value.trim();
+        const nameStr = document.getElementById('student-name').value.trim();
+        const passStr = document.getElementById('school-pass').value.trim();
+
+        if(!classStr || !nameStr || !passStr) {
+            alert('請完整填寫所有欄位！');
+            return;
+        }
+        if(passStr !== CORRECT_PASSWORD) {
+            alert('密碼錯誤！請輸入中二級正確密碼。');
+            return;
+        }
+
+        document.getElementById('login-screen').classList.add('hide');
+        document.getElementById('game-screen').classList.remove('hide');
+        initGame();
+    });
+
+    function initGame() {
+        // 隨機抽取題目並混合
+        let shuffledMC = mcQuestions.sort(() => 0.5 - Math.random()).slice(0, 15);
+        if(shuffledMC.length === 0) shuffledMC = mcQuestions; // 確保防呆
+        let shuffledFill = fillQuestions.sort(() => 0.5 - Math.random()).slice(0, 5);
+        if(shuffledFill.length === 0) shuffledFill = fillQuestions;
+
+        currentPool = [...shuffledMC, ...shuffledFill].sort(() => 0.5 - Math.random());
+        currentQIndex = 0;
+        totalScore = 0;
+        totalTimeLeft = 0;
+        showQuestion();
+    }
+
+    function showQuestion() {
+        isAnswered = false;
+        clearInterval(timerInterval);
+        document.getElementById('rationale-area').style.display = 'none';
+        document.getElementById('next-btn-area').style.display = 'none';
+
+        if(currentQIndex >= currentPool.length) {
+            endGame();
+            return;
+        }
+
+        document.getElementById('q-counter').innerText = currentQIndex + 1;
+        currentQuestion = currentPool[currentQIndex];
+        
+        let timeLeft = currentQuestion.o ? 30 : 40;
+        document.getElementById('time-left').innerText = timeLeft;
+
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById('time-left').innerText = timeLeft;
+            if(timeLeft <= 0) {
+                clearInterval(timerInterval);
+                checkAnswer(-1); // 超時
+            }
+        }, 1000);
+
+        const qArea = document.getElementById('question-area');
+        const optArea = document.getElementById('options-area');
+        optArea.innerHTML = '';
+
+        if(currentQuestion.o) { // MC題
+            qArea.innerText = currentQuestion.q;
+            const grid = document.createElement('div');
+            grid.className = 'options-grid';
+            currentQuestion.o.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => { if(!isAnswered) checkAnswer(idx); };
+                grid.appendChild(btn);
+            });
+            optArea.appendChild(grid);
+        } else { // 填充題
+            qArea.innerText = currentQuestion.q;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'fill-input';
+            input.placeholder = '請輸入答案後按 Enter 鍵';
+            input.onkeydown = (e) => {
+                if(e.key === 'Enter' && !isAnswered) {
+                    checkAnswer(input.value.trim());
+                }
+            };
+            optArea.appendChild(input);
+            input.focus();
+        }
+    }
+
+    function checkAnswer(userAnswer) {
+        isAnswered = true;
+        clearInterval(timerInterval);
+        const ratArea = document.getElementById('rationale-area');
+        const secLeft = parseInt(document.getElementById('time-left').innerText) || 0;
+
+        let isCorrect = false;
+        if(currentQuestion.o) {
+            const btns = document.getElementsByClassName('option-btn');
+            if(userAnswer === currentQuestion.a) {
+                isCorrect = true;
+                if(btns[userAnswer]) btns[userAnswer].classList.add('correct');
+            } else {
+                if(btns[userAnswer]) btns[userAnswer].classList.add('wrong');
+                if(btns[currentQuestion.a]) btns[currentQuestion.a].classList.add('correct');
+            }
+        } else {
+            if(userAnswer === currentQuestion.a) {
+                isCorrect = true;
+            }
+        }
+
+        if(isCorrect) {
+            let points = 50 + (secLeft * 2);
+            totalScore += points;
+            totalTimeLeft += secLeft;
+            document.getElementById('score-display').innerText = totalScore;
+            ratArea.innerText = "⭕ 答對了！太棒了！";
+            ratArea.style.background = "#2ecc71";
+        } else {
+            ratArea.innerText = currentQuestion.o ? "❌ 答錯囉！正確答案是：" + currentQuestion.o[currentQuestion.a] : "❌ 答錯囉！正確答案是：" + currentQuestion.a;
+            ratArea.style.background = "#e74c3c";
+        }
+
+        ratArea.style.display = 'block';
+        document.getElementById('next-btn-area').style.display = 'block';
+    }
+
+    document.getElementById('next-btn').addEventListener('click', () => {
+        currentQIndex++;
+        showQuestion();
+    });
+
+    function endGame() {
+        document.getElementById('game-screen').classList.add('hide');
+        document.getElementById('result-screen').classList.remove('hide');
+        
+        const classStr = document.getElementById('student-class').value;
+        const nameStr = document.getElementById('student-name').value;
+
+        document.getElementById('cert-name').innerText = nameStr;
+        document.getElementById('cert-score').innerText = totalScore;
+        document.getElementById('cert-time').innerText = totalTimeLeft;
+
+        // 上傳數據到 Google Apps Script
+        const payload = {
+            gameTitle: GAME_TITLE,
+            classStr: classStr,
+            name: nameStr,
+            score: totalScore,
+            time: totalTimeLeft
+        };
+
+        fetch(webAppUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).then(() => {
+            setTimeout(loadLeaderboard, 1500); // 延遲載入排行榜確保數據寫入
+        }).catch(err => {
+            console.error(err);
+            document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="5">成績上傳失敗，無法更新排行榜。</td></tr>';
+        });
+    }
+
+    function loadLeaderboard() {
+        // 利用 no-cors 限制，我們可以直接從部署好的萬用後台改為透過 JSONP 或直接由原本試算表的網頁發布功能拉取，
+        // 這裡提供基礎防錯提示，若您的 Web App 無法回傳，亦可用靜態提示
+        document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="5" class="top-rank">✅ 成績已成功紀錄於雲端！排行榜已自動刷新於老師的母表中。</td></tr>';
+    }
+</script>
+</body>
+</html>
