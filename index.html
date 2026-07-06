@@ -217,7 +217,7 @@
     <button class="btn" id="start-btn">▶ 開始挑戰</button>
 </div>
 
-<div class="container hide" id="game-screen">
+<div class="container hide" id="game-screen" style="display:none;">
     <div class="header-bar">
         <div>📝 題目: <span id="q-counter">1</span> / 20</div>
         <div>🏆 分數: <span id="score-display">0</span></div>
@@ -233,7 +233,7 @@
     </div>
 </div>
 
-<div class="container hide" id="result-screen">
+<div class="container hide" id="result-screen" style="display:none;">
     <h1>🎉 挑戰完成！</h1>
     
     <div class="certificate" id="certificate-box">
@@ -241,14 +241,14 @@
         <p><strong>姓名：</strong><span id="cert-name"></span> (<span id="cert-class"></span>)</p>
         <p><strong>最終得分：</strong><span id="cert-score" style="font-size: 24px; color: #c0392b; font-weight:bold;"></span> 分</p>
         <p><strong>總作答耗時：</strong><span id="cert-time"></span> 秒</p>
-        <p id="upload-status" style="color: #3498db; font-weight: bold; margin-top: 10px;">⏳ 正在將成績同步至雲端排行榜...</p>
+        <p id="upload-status" style="color: #3498db; font-weight: bold; margin-top: 10px;">⏳ 正在將成績同步至雲端...</p>
     </div>
     
     <button class="btn" id="copy-btn">📋 一鍵複製成績</button>
     <button class="btn" id="reload-btn" style="background: #3498db;">🔄 重新開始</button>
 
     <div class="leaderboard-box">
-        <div class="leaderboard-title">🏆 全班即時排行榜</div>
+        <div class="leaderboard-title">🏆 雲端即時前 10 名排行榜</div>
         <table class="leaderboard-table">
             <thead>
                 <tr>
@@ -266,13 +266,13 @@
     </div>
 </div>
 <script>
-// 【重要設定】已填入您的 Google Apps Script 部署網址與中二級專屬通關密碼
-const CLOUD_URL = "https://script.google.com/macros/s/AKfycbw7d7vxkkvPOINEwk1eAcRjs0FuODEIEJZFUNlMwcRUbzD2e79IU8kM4C1nv_ij8LL9/exec";
+// 【重要設定】
+const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxDX229s0afkaFVuBvCUZIg0kUBW12Zl5z7AFUtqjywStKZwWYIxcoDbbaBNxGVM8Yz/exec";
 const SCHOOL_PASSWORD = "school2026"; 
 const GAME_TITLE = "工業革命";
 
 window.onload = function() {
-    document.getElementById('start-btn').addEventListener('click', loginCheck);
+    document.getElementById('start-btn').addEventListener('click', startGame);
     document.getElementById('next-btn').addEventListener('click', loadNextQuestion);
     document.getElementById('copy-btn').addEventListener('click', copyResult);
     document.getElementById('reload-btn').addEventListener('click', function() {
@@ -346,198 +346,311 @@ const allFill = [
     {q:"農村人口源源不絕遷入，導致城鎮數量與面積出現爆炸性向外擴展的現象史稱 ________。", a:["城市化","都市化"], r:"農村人口向城市集中的地理與社會學轉變史稱城市化或都市化。"}
 ];
 
-let gameQuestions = [];
-let currentItemIndex = 0;
-let userScore = 0;
-let totalUsedTime = 0;
-let questionTimer;
-let currentSecondsLeft = 0;
-let isCurrentQuestionAnswered = false;
-let studentClass = "";
-let studentName = "";
+let currentQuiz = [];
+let currentIndex = 0;
+let score = 0;
+let totalSeconds = 0; 
+let timerInterval;
+let timeLeft;
+let questionStartTime;
 
-function loginCheck() {
-    studentClass = document.getElementById('student-class').value.trim();
-    studentName = document.getElementById('student-name').value.trim();
-    const passInput = document.getElementById('school-pass').value.trim();
+const studentData = { name: "", class: "" };
 
-    if (!studentClass || !studentName || !passInput) {
-        alert("請完整輸入班別學號、姓名及通關密碼！");
-        return;
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        let temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
     }
-    if (passInput !== SCHOOL_PASSWORD) {
-        alert("通關密碼錯誤！請輸入中二級正確密碼。");
-        return;
-    }
-
-    document.getElementById('login-screen').classList.add('hide');
-    document.getElementById('game-screen').classList.remove('hide');
-    buildGamePool();
+    return array;
 }
 
-function buildGamePool() {
-    // 隨機抽取 15 題 MC 與 5 題 填充
-    let mcShuffled = [...allMC].sort(() => 0.5 - Math.random()).slice(0, 15);
-    let fillShuffled = [...allFill].sort(() => 0.5 - Math.random()).slice(0, 5);
+function startGame() {
+    const cName = document.getElementById('student-class').value.trim();
+    const sName = document.getElementById('student-name').value.trim();
+    const sPass = document.getElementById('school-pass').value.trim();
     
-    // 混合成 20 題的最終考卷並徹底打散
-    gameQuestions = [...mcShuffled, ...fillShuffled].sort(() => 0.5 - Math.random());
-    currentItemIndex = 0;
-    userScore = 0;
-    totalUsedTime = 0;
+    if(!cName || !sName || !sPass) { 
+        showLoginError("⚠️ 所有欄位皆為必填！");
+        return; 
+    }
+    
+    if(sPass !== SCHOOL_PASSWORD) {
+        showLoginError("⚠️ 通關密碼錯誤，請重新輸入！");
+        return;
+    }
+    
+    studentData.class = cName;
+    studentData.name = sName;
+    
+    let selectedMC = shuffle(allMC.slice()).slice(0, 15).map(function(q){ return {q: q.q, o: q.o, a: q.a, r: q.r, type: 0}; });
+    let selectedFill = shuffle(allFill.slice()).slice(0, 5).map(function(q){ return {q: q.q, a: q.a, r: q.r, type: 1}; });
+    
+    currentQuiz = shuffle(selectedMC.concat(selectedFill));
+    
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('game-screen').style.display = 'block';
     
     loadQuestion();
+}
+
+function showLoginError(msg) {
+    const btn = document.getElementById('start-btn');
+    btn.innerText = msg; 
+    btn.style.background = "#e74c3c";
+    btn.style.color = "#fff";
+    setTimeout(function() { 
+        btn.innerText = "▶ 開始挑戰"; 
+        btn.style.background = "var(--gold)"; 
+        btn.style.color = "#000";
+    }, 2000);
 }
 
 function loadQuestion() {
-    isCurrentQuestionAnswered = false;
-    clearInterval(questionTimer);
-    document.getElementById('rationale-area').style.display = 'none';
-    document.getElementById('next-btn-area').style.display = 'none';
-
-    if (currentItemIndex >= gameQuestions.length) {
-        finishGame();
+    const ratArea = document.getElementById('rationale-area');
+    const nextBtnArea = document.getElementById('next-btn-area');
+    const optArea = document.getElementById('options-area');
+    
+    ratArea.style.display = "none";
+    nextBtnArea.style.display = "none";
+    optArea.innerHTML = "";
+    
+    if(currentIndex >= currentQuiz.length) {
+        endGame();
         return;
     }
-
-    document.getElementById('q-counter').innerText = currentItemIndex + 1;
-    let currentQ = gameQuestions[currentItemIndex];
     
-    // 設定倒數時間：MC 題 30 秒，填充題 40 秒
-    currentSecondsLeft = currentQ.o ? 30 : 40;
-    document.getElementById('time-left').innerText = currentSecondsLeft;
-
-    questionTimer = setInterval(() => {
-        currentSecondsLeft--;
-        document.getElementById('time-left').innerText = currentSecondsLeft;
-        totalUsedTime++;
-        if (currentSecondsLeft <= 0) {
-            clearInterval(questionTimer);
-            evaluateAnswer(-1); // 超時視同答錯
-        }
-    }, 1000);
-
-    const qBox = document.getElementById('question-area');
-    const optArea = document.getElementById('options-area');
-    optArea.innerHTML = '';
-    qBox.innerText = currentQ.q;
-
-    if (currentQ.o) { // 渲染MC選擇題
+    const qData = currentQuiz[currentIndex];
+    document.getElementById('q-counter').innerText = currentIndex + 1;
+    document.getElementById('question-area').innerText = "【第 " + (currentIndex + 1) + " 題】 " + qData.q;
+    
+    if(qData.type === 0) {
+        timeLeft = 30;
         const grid = document.createElement('div');
-        grid.className = 'options-grid';
-        currentQ.o.forEach((optionText, idx) => {
-            const optBtn = document.createElement('button');
-            optBtn.className = 'option-btn';
-            optBtn.innerText = optionText;
-            optBtn.onclick = function() { if (!isCurrentQuestionAnswered) evaluateAnswer(idx); };
-            grid.appendChild(optBtn);
-        });
+        grid.className = "options-grid";
+        for(let idx = 0; idx < qData.o.length; idx++) {
+            let btn = document.createElement('button');
+            btn.className = "option-btn";
+            btn.innerText = String.fromCharCode(65 + idx) + ". " + qData.o[idx];
+            btn.onclick = function() { checkAnswer(idx, btn, qData); };
+            grid.appendChild(btn);
+        }
         optArea.appendChild(grid);
-    } else { // 渲染填充題
-        const inputField = document.createElement('input');
-        inputField.type = 'text';
-        inputField.className = 'fill-input';
-        inputField.placeholder = '請在此處輸入答案，然後按 Enter 鍵送出';
-        inputField.onkeydown = function(e) {
-            if (e.key === 'Enter' && !isCurrentQuestionAnswered) {
-                evaluateAnswer(inputField.value.trim());
-            }
-        };
-        optArea.appendChild(inputField);
-        inputField.focus();
+    } else {
+        timeLeft = 40;
+        const input = document.createElement('input');
+        input.type = "text";
+        input.className = "fill-input";
+        input.placeholder = "請輸入中文答案...";
+        input.id = "fill-ans";
+        
+        const subBtn = document.createElement('button');
+        subBtn.className = "btn";
+        subBtn.style.marginTop = "15px";
+        subBtn.innerText = "提交答案";
+        subBtn.onclick = function() { checkFillAnswer(qData); };
+        
+        input.onkeypress = function(e) { if(e.key === 'Enter') checkFillAnswer(qData); };
+        
+        optArea.appendChild(input);
+        optArea.appendChild(document.createElement('br'));
+        optArea.appendChild(subBtn);
+        setTimeout(function() { input.focus(); }, 100);
+    }
+    
+    document.getElementById('time-left').innerText = timeLeft;
+    questionStartTime = new Date().getTime();
+    timerInterval = setInterval(updateTimer, 1000);
+}
+
+function updateTimer() {
+    timeLeft--;
+    document.getElementById('time-left').innerText = timeLeft;
+    if(timeLeft <= 0) {
+        clearInterval(timerInterval);
+        totalSeconds += (new Date().getTime() - questionStartTime) / 1000;
+        const qData = currentQuiz[currentIndex];
+        
+        if(qData.type === 0) {
+            const btns = document.getElementById('options-area').getElementsByTagName('button');
+            for(let i = 0; i < btns.length; i++) btns[i].disabled = true;
+            btns[qData.a].classList.add('correct');
+        } else {
+            const inp = document.getElementById('fill-ans');
+            if(inp) inp.disabled = true;
+        }
+        showRationale(qData.r, false);
     }
 }
 
-function evaluateAnswer(userAns) {
-    isCurrentQuestionAnswered = true;
-    clearInterval(questionTimer);
+function checkAnswer(selectedIdx, btnElement, qData) {
+    clearInterval(timerInterval);
+    const timeUsed = (new Date().getTime() - questionStartTime) / 1000;
+    totalSeconds += timeUsed;
     
-    let currentQ = gameQuestions[currentItemIndex];
-    let isRight = false;
-    const ratArea = document.getElementById('rationale-area');
-
-    if (currentQ.o) { // 選擇題判定
-        const btns = document.getElementsByClassName('option-btn');
-        if (userAns === currentQ.a) {
-            isRight = true;
-            if (btns[userAns]) btns[userAns].classList.add('correct');
-        } else {
-            if (btns[userAns]) btns[userAns].classList.add('wrong');
-            if (btns[currentQ.a]) btns[currentQ.a].classList.add('correct');
-        }
-    } else { // 填充題判定
-        if (userAns === currentQ.a) {
-            isRight = true;
-        }
-    }
-
-    if (isRight) {
-        let earnedPoints = 50 + (currentSecondsLeft * 2); // 越快答對分數越高
-        userScore += earnedPoints;
-        document.getElementById('score-display').innerText = userScore;
-        ratArea.innerHTML = "⭕ <strong>答對了！</strong><br>" + (currentQ.r ? currentQ.r : "表現優異！");
-        ratArea.style.background = "#2ecc71";
+    const btns = document.getElementById('options-area').getElementsByTagName('button');
+    for(let i = 0; i < btns.length; i++) btns[i].disabled = true;
+    
+    const isCorrect = (selectedIdx === qData.a);
+    if(isCorrect) {
+        btnElement.classList.add('correct');
+        score += (1000 + (timeLeft * 10));
+        document.getElementById('score-display').innerText = score;
     } else {
-        let correctText = currentQ.o ? currentQ.o[currentQ.a] : currentQ.a;
-        ratArea.innerHTML = "❌ <strong>答錯囉！</strong>正確答案應該是：<span style='color:#f1c40f;font-weight:bold;'>" + correctText + "</span><br>" + (currentQ.r ? currentQ.r : "");
-        ratArea.style.background = "#e74c3c";
+        btnElement.classList.add('wrong');
+        btns[qData.a].classList.add('correct');
     }
+    showRationale(qData.r, isCorrect);
+}
 
-    ratArea.style.display = 'block';
-    document.getElementById('next-btn-area').style.display = 'block';
+// 【修復核心】：超級寬容的填充題比對法，確保不會誤判
+function checkFillAnswer(qData) {
+    const input = document.getElementById('fill-ans');
+    const rawUserAns = input.value;
+    if(!rawUserAns.trim()) return; 
+    
+    clearInterval(timerInterval);
+    const timeUsed = (new Date().getTime() - questionStartTime) / 1000;
+    totalSeconds += timeUsed;
+    
+    input.disabled = true;
+    const btns = document.getElementById('options-area').getElementsByTagName('button');
+    for(let i = 0; i < btns.length; i++) btns[i].disabled = true;
+    
+    // 強制統一轉為小寫並移除所有空格與各種括號
+    let standardizedUser = rawUserAns.replace(/[\s\(\)（）]/g, "").toLowerCase();
+    
+    // 確保後台答案被正確當作「陣列」處理，而非單一字串
+    let validAnswers = Array.isArray(qData.a) ? qData.a : [qData.a];
+    let isCorrect = false;
+    
+    for(let i = 0; i < validAnswers.length; i++) {
+        let standardizedCorrect = validAnswers[i].replace(/[\s\(\)（）]/g, "").toLowerCase();
+        if(standardizedUser === standardizedCorrect) {
+            isCorrect = true;
+            break;
+        }
+    }
+    
+    if(isCorrect) {
+        input.style.backgroundColor = "var(--correct)";
+        input.style.color = "#fff";
+        score += (1000 + (timeLeft * 15));
+        document.getElementById('score-display').innerText = score;
+    } else {
+        input.style.backgroundColor = "var(--wrong)";
+        input.style.color = "#fff";
+        input.value = "答錯！正解應為: " + validAnswers[0];
+    }
+    showRationale(qData.r, isCorrect);
+}
+
+function showRationale(text, isCorrect) {
+    const ratArea = document.getElementById('rationale-area');
+    ratArea.style.display = "block";
+    ratArea.style.backgroundColor = isCorrect ? "#27ae60" : "#c0392b";
+    ratArea.innerHTML = "<strong>💡 歷史解說：</strong> " + text;
+    document.getElementById('next-btn-area').style.display = "block";
 }
 
 function loadNextQuestion() {
-    currentItemIndex++;
+    currentIndex++;
     loadQuestion();
 }
 
-function finishGame() {
-    document.getElementById('game-screen').classList.add('hide');
-    document.getElementById('result-screen').classList.remove('hide');
+function endGame() {
+    document.getElementById('game-screen').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'block';
+    
+    const finalSec = Math.round(totalSeconds);
+    
+    document.getElementById('cert-name').innerText = studentData.name;
+    document.getElementById('cert-class').innerText = studentData.class;
+    document.getElementById('cert-score').innerText = score;
+    document.getElementById('cert-time').innerText = finalSec;
+    
+    uploadScore(studentData.class, studentData.name, score, finalSec);
+}
 
-    document.getElementById('cert-name').innerText = studentName;
-    document.getElementById('cert-class').innerText = studentClass;
-    document.getElementById('cert-score').innerText = userScore;
-    document.getElementById('cert-time').innerText = totalUsedTime;
-
-    // 將成績封裝成 JSON 透過 fetch 外送到您的萬用 Google 表單中
-    const scorePayload = {
+function uploadScore(classStr, name, score, time) {
+    const payload = {
         gameTitle: GAME_TITLE,
-        classStr: studentClass,
-        name: studentName,
-        score: userScore,
-        time: totalUsedTime
+        classStr: classStr,
+        name: name,
+        score: score,
+        time: time
     };
 
     fetch(CLOUD_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(scorePayload)
-    }).then(() => {
-        document.getElementById('upload-status').innerText = "✅ 成績已成功安全上傳至雲端母表！";
-        setTimeout(pullLeaderboard, 1000);
-    }).catch(err => {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    })
+    .then(function() {
+        document.getElementById('upload-status').innerText = "✅ 成績已成功安全寫入雲端母表！";
+        document.getElementById('upload-status').style.color = "var(--correct)";
+        // 延遲1秒再抓取，確保成績已經被寫進 Google 試算表
+        setTimeout(fetchLeaderboard, 1000); 
+    })
+    .catch(function(err) {
+        document.getElementById('upload-status').innerText = "⚠️ 成績同步異常，但仍可複製證書。";
+        document.getElementById('upload-status').style.color = "var(--wrong)";
         console.error(err);
-        document.getElementById('upload-status').innerText = "❌ 網路通道異常，成績上傳失敗。";
     });
 }
 
-function pullLeaderboard() {
-    // 預設提示，當學生順利寫入後，老師打開總表格即可直接閱覽完全實時的分類排行
-    document.getElementById('leaderboard-body').innerHTML = `
-        <tr class='top-rank'>
-            <td colspan='5'>🎉 資料已在「歷史科網上遊戲成績總表」歸檔！分頁名稱：【${GAME_TITLE}】</td>
-        </tr>`;
+// 【修復核心】：突破阻擋，使用跨網域 JSONP 獲取真實排行榜資料
+function fetchLeaderboard() {
+    const tbody = document.getElementById('leaderboard-body');
+    tbody.innerHTML = "<tr><td colspan='5'>正在載入最新排名...</td></tr>";
+
+    // 建立一個獨特的呼叫名稱
+    const callbackName = "jsonp_callback_" + Math.round(100000 * Math.random());
+    
+    // 當抓到資料時，系統會自動執行這一段繪製表格
+    window[callbackName] = function(data) {
+        tbody.innerHTML = "";
+        if(!data || data.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='5'>目前暫無排名，你就是第一位挑戰者！</td></tr>";
+        } else {
+            for(let i = 0; i < Math.min(data.length, 10); i++) {
+                let tr = document.createElement('tr');
+                let rankClass = (i < 3) ? "top-rank" : "";
+                tr.innerHTML = "<td class='" + rankClass + "'>" + (i + 1) + "</td>" +
+                               "<td>" + (data[i].classStr || "") + "</td>" +
+                               "<td>" + (data[i].name || "") + "</td>" +
+                               "<td>" + (data[i].score || 0) + "</td>" +
+                               "<td>" + (data[i].time || 0) + "秒</td>";
+                tbody.appendChild(tr);
+            }
+        }
+        delete window[callbackName];
+        document.getElementById(callbackName).remove();
+    };
+
+    // 發射隱形指令給 Google Apps Script
+    const script = document.createElement('script');
+    script.id = callbackName;
+    script.src = CLOUD_URL + "?gameTitle=" + encodeURIComponent(GAME_TITLE) + "&callback=" + callbackName;
+    document.body.appendChild(script);
+    
+    // 預防萬一 Google 當機，8 秒後顯示超時警告
+    setTimeout(() => {
+        if(window[callbackName]) {
+            tbody.innerHTML = "<tr><td colspan='5' style='color:var(--wrong);'>⚠️ 無法載入排行榜，請重新整理網頁</td></tr>";
+            delete window[callbackName];
+        }
+    }, 8000);
 }
 
 function copyResult() {
-    const textToCopy = `我在【👑 ${GAME_TITLE}百萬富翁挑戰賽】中獲得了 ${userScore} 分，總作答耗時 ${totalUsedTime} 秒！老師，我已成功提交成績！`;
-    navigator.clipboard.writeText(textToCopy).then(() => {
-        alert("成績證書複製成功！可以貼到通訊軟體回報給老師囉！");
-    }).catch(() => {
-        alert("複製失敗，請手動截圖畫面保留證書。");
+    const text = "🏆 " + GAME_TITLE + "歷史挑戰賽成績\n姓名：" + studentData.class + " " + studentData.name + "\n得分：" + score + " 分\n耗時：" + Math.round(totalSeconds) + " 秒";
+    navigator.clipboard.writeText(text).then(function() {
+        alert("✅ 成績已複製！您可以直接貼到 Google Classroom 回報給老師囉！");
+    }).catch(function(err) {
+        alert("無法自動複製，請手動圈選上方證書文字進行複製。");
     });
 }
 </script>
