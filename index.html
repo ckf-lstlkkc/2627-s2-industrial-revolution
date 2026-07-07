@@ -5,194 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>百萬富翁：工業革命挑戰賽</title>
     <style>
-        :root {
-            --bg-color: #0b0e14;
-            --panel-bg: #1b2735;
-            --gold: #f1c40f;
-            --text-light: #ecf0f1;
-            --correct: #2ecc71;
-            --wrong: #e74c3c;
-            --btn-bg: #1e3799;
-        }
-
-        body {
-            font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
-            background: var(--panel-bg);
-            color: var(--text-light);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 800px;
-            width: 100%;
-            background: #090a0f;
-            padding: 30px;
-            border-radius: 15px;
-            border: 2px solid var(--gold);
-            text-align: center;
-            box-sizing: border-box;
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            color: var(--gold);
-            font-size: 2em;
-            margin-bottom: 20px;
-        }
-
-        .login-group {
-            margin: 15px 0;
-            text-align: left;
-        }
-        
-        .login-group label {
-            display: block;
-            color: var(--gold);
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        
-        .login-group input {
-            width: 95%;
-            padding: 12px;
-            font-size: 16px;
-            background: #fff;
-            border: 2px solid var(--gold);
-            border-radius: 8px;
-            color: #000;
-            box-sizing: border-box;
-        }
-
-        .btn {
-            background: var(--gold);
-            color: #000;
-            font-weight: bold;
-            font-size: 18px;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            margin-top: 15px;
-        }
-        
+        :root { --bg-color: #0b0e14; --panel-bg: #1b2735; --gold: #f1c40f; --text-light: #ecf0f1; --correct: #2ecc71; --wrong: #e74c3c; --btn-bg: #1e3799; }
+        body { font-family: "Microsoft JhengHei", "PingFang TC", sans-serif; background: var(--panel-bg); color: var(--text-light); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .container { max-width: 800px; width: 100%; background: #090a0f; padding: 30px; border-radius: 15px; border: 2px solid var(--gold); text-align: center; box-sizing: border-box; margin-bottom: 20px; }
+        h1 { color: var(--gold); font-size: 2em; margin-bottom: 20px; }
+        .login-group { margin: 15px 0; text-align: left; }
+        .login-group label { display: block; color: var(--gold); margin-bottom: 5px; font-weight: bold; }
+        .login-group input { width: 95%; padding: 12px; font-size: 16px; background: #fff; border: 2px solid var(--gold); border-radius: 8px; color: #000; box-sizing: border-box; }
+        .btn { background: var(--gold); color: #000; font-weight: bold; font-size: 18px; padding: 12px 30px; border: none; border-radius: 30px; cursor: pointer; margin-top: 15px; }
         .btn:hover { background: #e67e22; }
         .btn:disabled { background: #7f8c8d; cursor: not-allowed; }
-
-        .header-bar {
-            display: flex;
-            justify-content: space-between;
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--gold);
-            margin-bottom: 20px;
-            border-bottom: 1px solid rgba(241, 196, 15, 0.3);
-            padding-bottom: 10px;
-        }
-        
+        .header-bar { display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; color: var(--gold); margin-bottom: 20px; border-bottom: 1px solid rgba(241, 196, 15, 0.3); padding-bottom: 10px; }
         .timer { font-size: 24px; color: #e74c3c; }
-
-        .question-box {
-            font-size: 22px;
-            font-weight: bold;
-            background: #1c2833;
-            padding: 25px;
-            border: 2px solid #3498db;
-            border-radius: 10px;
-            margin-bottom: 25px;
-            line-height: 1.5;
-        }
-
-        .options-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        @media(max-width: 600px) {
-            .options-grid { grid-template-columns: 1fr; }
-        }
-
-        .option-btn {
-            background: var(--btn-bg);
-            color: #fff;
-            border: 2px solid var(--gold);
-            padding: 15px;
-            font-size: 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: left;
-        }
-        
+        .question-box { font-size: 22px; font-weight: bold; background: #1c2833; padding: 25px; border: 2px solid #3498db; border-radius: 10px; margin-bottom: 25px; line-height: 1.5; white-space: pre-wrap; text-align: left;}
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        @media(max-width: 600px) { .options-grid { grid-template-columns: 1fr; } }
+        .option-btn { background: var(--btn-bg); color: #fff; border: 2px solid var(--gold); padding: 15px; font-size: 18px; border-radius: 8px; cursor: pointer; text-align: left; }
         .option-btn:hover { background: #2980b9; }
         .option-btn.correct { background: var(--correct); border-color: #27ae60; }
         .option-btn.wrong { background: var(--wrong); border-color: #c0392b; }
-
-        .fill-input {
-            width: 80%;
-            padding: 15px;
-            font-size: 20px;
-            text-align: center;
-            border: 2px solid var(--gold);
-            border-radius: 8px;
-            background: #fff;
-            color: #000;
-        }
-
-        .rationale-box {
-            margin-top: 20px;
-            padding: 15px;
-            background: #27ae60;
-            border-radius: 5px;
-            text-align: left;
-            font-size: 16px;
-            display: none;
-            color: #fff;
-        }
-
+        .fill-input { width: 80%; padding: 15px; font-size: 20px; text-align: center; border: 2px solid var(--gold); border-radius: 8px; background: #fff; color: #000; }
+        .rationale-box { margin-top: 20px; padding: 15px; background: #27ae60; border-radius: 5px; text-align: left; font-size: 16px; display: none; color: #fff; }
         .next-btn-container { margin-top: 20px; display: none; }
-
-        .certificate {
-            background: #fdfbfb;
-            color: #2c3e50;
-            padding: 20px;
-            border: 5px double var(--gold);
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        /* 排行榜樣式 */
-        .leaderboard-box {
-            margin-top: 25px;
-            background: #111;
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid var(--gold);
-        }
-        .leaderboard-title {
-            color: var(--gold);
-            font-size: 20px;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-        .leaderboard-table {
-            width: 100%;
-            border-collapse: collapse;
-            color: #fff;
-        }
-        .leaderboard-table th, .leaderboard-table td {
-            padding: 10px;
-            border-bottom: 1px solid #333;
-            text-align: center;
-        }
+        .certificate { background: #fdfbfb; color: #2c3e50; padding: 20px; border: 5px double var(--gold); border-radius: 10px; margin-bottom: 20px; }
+        .leaderboard-box { margin-top: 25px; background: #111; padding: 20px; border-radius: 10px; border: 1px solid var(--gold); }
+        .leaderboard-title { color: var(--gold); font-size: 20px; margin-bottom: 15px; font-weight: bold; }
+        .leaderboard-table { width: 100%; border-collapse: collapse; color: #fff; }
+        .leaderboard-table th, .leaderboard-table td { padding: 10px; border-bottom: 1px solid #333; text-align: center; }
         .leaderboard-table th { color: var(--gold); }
         .top-rank { color: #f39c12; font-weight: bold; }
-
-        .hide { display: none; }
+        .hide { display: none !important; }
     </style>
 </head>
 <body>
@@ -200,7 +42,6 @@
 <div class="container" id="login-screen">
     <h1>👑 工業革命百萬富翁</h1>
     <p>請填寫登入資訊以開始挑戰</p>
-    
     <div class="login-group">
         <label>班別與學號 (例: 2A 05)</label>
         <input type="text" id="student-class" placeholder="請輸入班別學號">
@@ -213,29 +54,25 @@
         <label>學校專屬通關密碼 (校外人士防護)</label>
         <input type="password" id="school-pass" placeholder="請輸入老師給的通關密碼">
     </div>
-    
     <button class="btn" id="start-btn">▶ 開始挑戰</button>
 </div>
 
-<div class="container hide" id="game-screen" style="display:none;">
+<div class="container hide" id="game-screen">
     <div class="header-bar">
         <div>📝 題目: <span id="q-counter">1</span> / 20</div>
         <div>🏆 分數: <span id="score-display">0</span></div>
         <div class="timer">⏳ <span id="time-left">30</span>s</div>
     </div>
-    
     <div id="question-area" class="question-box">題目載入中...</div>
     <div id="options-area"></div>
     <div id="rationale-area" class="rationale-box"></div>
-    
     <div id="next-btn-area" class="next-btn-container">
         <button class="btn" id="next-btn">下一題 ➡️</button>
     </div>
 </div>
 
-<div class="container hide" id="result-screen" style="display:none;">
+<div class="container hide" id="result-screen">
     <h1>🎉 挑戰完成！</h1>
-    
     <div class="certificate" id="certificate-box">
         <h2 style="color: #d35400;">🏆 榮譽成績證書</h2>
         <p><strong>姓名：</strong><span id="cert-name"></span> (<span id="cert-class"></span>)</p>
@@ -243,21 +80,13 @@
         <p><strong>總作答耗時：</strong><span id="cert-time"></span> 秒</p>
         <p id="upload-status" style="color: #3498db; font-weight: bold; margin-top: 10px;">⏳ 正在將成績同步至雲端...</p>
     </div>
-    
     <button class="btn" id="copy-btn">📋 一鍵複製成績</button>
     <button class="btn" id="reload-btn" style="background: #3498db;">🔄 重新開始</button>
-
     <div class="leaderboard-box">
         <div class="leaderboard-title">🏆 雲端即時前 10 名排行榜</div>
         <table class="leaderboard-table">
             <thead>
-                <tr>
-                    <th>名次</th>
-                    <th>班別</th>
-                    <th>姓名</th>
-                    <th>分數</th>
-                    <th>耗時</th>
-                </tr>
+                <tr><th>名次</th><th>班別</th><th>姓名</th><th>分數</th><th>耗時</th></tr>
             </thead>
             <tbody id="leaderboard-body">
                 <tr><td colspan="5">正在載入最新排名...</td></tr>
@@ -265,85 +94,88 @@
         </table>
     </div>
 </div>
+
 <script>
-// 【重要設定】
-const CLOUD_URL = "https://script.google.com/macros/s/AKfycbw7d7vxkkvPOINEwk1eAcRjs0FuODEIEJZFUNlMwcRUbzD2e79IU8kM4C1nv_ij8LL9/exec";
+// ==========================================
+// 老師提供的正確最新 /exec 網址已套用
+// ==========================================
+const CLOUD_URL = "https://script.google.com/macros/s/AKfycbw7d7vxkkvPOINEwk1eAcRjs0FuODEIEJZFUNlMwcRUbzD2e79IU8kM4C1nv_ij8LL9/exec"; 
 const SCHOOL_PASSWORD = "school2026"; 
-const GAME_TITLE = "工業革命";
+const GAME_TITLE = "工業革命"; 
 
 window.onload = function() {
     document.getElementById('start-btn').addEventListener('click', startGame);
     document.getElementById('next-btn').addEventListener('click', loadNextQuestion);
     document.getElementById('copy-btn').addEventListener('click', copyResult);
-    document.getElementById('reload-btn').addEventListener('click', function() {
-        window.location.reload();
-    });
+    document.getElementById('reload-btn').addEventListener('click', function() { location.reload(); });
 };
 
+// 老師的 45 題完整單選+複選題庫 [cite: 323]
 const allMC = [
-    {q:"工業革命時期，人類社會的生產模式發生了根本性轉變，這個時代在歷史上又被稱為什麼？", o:["蒸汽時代","機器時代","資訊時代","鐵器時代"], a:1, r:"工業革命的核心特徵是以機器生產取代手工勞作，因此歷史上常將這個時代稱為機器時代。"},
-    {q:"工業革命最先在英國展開，這場變革大約發生在以下哪一個歷史時期？", o:["十七世紀中葉至十八世紀末","十九世紀中葉至二十世紀末","十八世紀中葉至十九世紀中","十八世紀中葉至十九世紀末"], a:3, r:"歷史學界普遍公認英國工業革命大約始於 1750 年代，並持續發展至十九世紀末。"},
-    {q:"在工業革命期間，歐洲各國湧現了大量改變人類生活的重大科技成果。以下哪一組全屬於工業革命時期的發明？", o:["珍妮紡紗機、改良蒸汽機、蒸汽鐵路機車","印刷術、指南針、火藥","網際網路、智慧型手機、核能發電廠","柴油汽車、地鐵列車、飛機"], a:0, r:"紡紗機、蒸汽機與蒸汽機車均為十八至十九世紀初工業革命第一階段核心代表性發明。"},
-    {q:"隨著技術變革，歐洲的經濟結構發生重大轉變。這裡所指的「技術變革」核心是指什麼？", o:["機器逐步取代人力、畜力等成為生產動力","莊園制度的解體與自由貿易的普及","行會制度的建立與海外市場的開拓","政府全面接管民間手工藝作坊"], a:0, r:"技術革新的最根本立足點，在於人類掌握了利用自然能源轉化為機器動力的技術。"},
-    {q:"「工業化」為歐洲國家帶來了結構性的經濟轉變，其具體表現是：", o:["國家開始依賴海外殖民地提供糧食","商業貿易完全取代了製造業","工業取代了傳統農業成為國家的經濟支柱","金融借貸成為城鎮居民唯一的生計"], a:2, r:"工業化意味著製造業快速膨脹，在國民總產值與就業結構中全面超越傳統農業。"},
-    {q:"在工業革命引進機器生產後，相較於傳統家庭手工業，這種新興機器生產模式具備了什麼最顯著的優勢？", o:["完全不需要任何原料","產量巨大且生產過程不易受到自然環境限制","能保障底層勞工豐厚工資","完全由政府定價免費配給"], a:1, r:"新式機器打破了水力或風力的地理與氣候局限，生產效率大幅飛躍。"},
-    {q:"十八世紀英國地主收回農民租田並圍築土地，迫使大量失去生計的農民湧入城市，為新興工廠提供了什麼？", o:["豐富天然原材料","先進科學理論","廣闊海外市場","充足廉價勞動力"], a:3, r:"失去土地的農民湧入城市出賣勞動力，為資本家提供了廉價勞工來源。"},
-    {q:"到了十九世紀初至中葉，工業革命的技術開始從英國傳播到以下哪些地區？", o:["其他歐洲國家及美國","亞洲的清朝與日本","非洲中南部與拉丁美洲","大洋洲的澳洲與新西蘭"], a:0, r:"工業革命向外擴散的第一波主要是鄰近的歐洲大陸與美國。"},
-    {q:"為了配合工業大量生產後對貨物運送速度的需求，工業革命期間在水路運輸出現了什麼重大建設？", o:["修築跨海大橋","建立貨櫃碼頭","禁止木船航行","大量開鑿運河連接河流"], a:3, r:"在鐵路普及前，開鑿人工運河是低成本運送笨重煤炭與原材料的關鍵工程。"},
-    {q:"掌握了機器、廠房與礦產等生產資源，並以此僱用勞工賺取利潤的人被稱為：", o:["專業人士","中產階級","資本家","貴族地主"], a:2, r:"擁有生產資料並透過購買勞動力賺取利潤的階級即是資本家。"},
-    {q:"為了在最短時間內製造出最多、質素平均的商品，生產過程普遍採用了什麼運作模式？", o:["師徒制","分工制","世襲制","自由放任制"], a:1, r:"分工制作業將複雜工序拆解，極大地加快了流水線生產速度。"},
-    {q:"新興的教師、記者以及工廠中的管理人員，在當時屬於哪一個階級？", o:["中產階級","資產階級","工人階級","貴族階級"], a:0, r:"擁有專業知識或管理技能，收入地位介於資產階級與工人之間的是中產階級。"},
-    {q:"哪一個社會階級因為掌握巨額財富，能在政治上發揮強大影響力動搖傳統貴族統治？", o:["中產階級","工人階級","農民階級","資產階級"], a:3, r:"新興工業資產階級隨著經濟實力超越封建地主，逐步主導了國家政策。"},
-    {q:"部份學者反對資本家對勞工的剝削，進而提出了什麼新興的主張？", o:["自由主義","民族主義","社會主義","重商主義"], a:2, r:"社會主義學說宗旨在於批判資本主義貧富分化，倡導社會公正。"},
-    {q:"十九世紀中葉後，西方工業強國向海外大肆擴張奪取殖民地的核心目的是甚麼？", o:["傳播技術","獲取生產原料及拓展海外市場","協助發展","促進平等貿易"], a:1, r:"為了滿足國內過剩產能與市場飽和，列強需強佔海外殖民地掠奪資源與傾銷。"},
-    {q:"陸路交通工具的革命性突破，發明了以下哪一種由非生物動力推動的運輸工具？", o:["柴油客車","蒸汽鐵路機車","地鐵列車","馬拉軌道車"], a:1, r:"史蒂芬生利用改良蒸汽機推道火車頭，開啟鐵路運輸新紀元。"},
-    {q:"哪一位歷史人物在醫學與公共衛生範疇做出巨大貢獻，並創立護士學校？", o:["歐文","羅伯特·皮爾","南丁格爾","詹姆斯·瓦特"], a:2, r:"南丁格爾改革戰地醫院衛生，將護理學提升為現代專業。"},
-    {q:"新型現代化工業生產模式下，生產的主要場所發生了什麼轉變？", o:["機器生產取代了傳統的家庭或小型工作坊生產","轉為國營手工生產","轉回農村集體勞作","依靠殖民地手工作坊"], a:0, r:"現代化大生產將大批機器與工人集中在廠房內統一管理。"},
-    {q:"早期工廠排放大量濃煙，導致工業城市普遍面臨什麼嚴重問題？", o:["勞動力短缺","土地荒廢","糧食過剩","嚴重的環境污染與公共衛生惡劣"], a:3, r:"缺乏環保法規，煤煙與污水導致霍亂等傳染病在工人區頻發。"},
-    {q:"德意志思想家公開反對剝削，合著政治綱領並資助反對私有制研究的是誰？", o:["恩格斯","詹姆斯·瓦特","南丁格爾","亞當·斯密"], a:0, r:"恩格斯是工人階級學說先驅，無私資助馬克思進行研究。"},
-    {q:"到二十世紀初，隨著列強在經貿與殖民地爭奪白熱化，全球局勢出現了什麼發展？", o:["全面裁軍","放棄殖民地","國際衝突不斷增加，局勢漸趨緊張","經貿聯繫中斷"], a:2, r:"地球領土被瓜分殆盡，列強零和博弈加劇引發國際危機。"},
-    {q:"工業革命爆發前，歐洲大多數人主要是以什麼方式維持生計？", o:["在城鎮經商","從事三角貿易","在礦場採煤","在農村務農"], a:3, r:"農業社會中，絕大多數人口綁定在土地上從事傳統耕作。"},
-    {q:"根據反對剝削的學者理論，要徹底解決貧富懸殊，社會財富應該如何處理？", o:["集中在資產階級手中","依封建血統劃分","平均分配給社會大眾","交由教會保管"], a:2, r:"社會主義學派認為，實行社會財富的平均分配才能消滅剝削。"},
-    {q:"到了十九世紀末，工業革命對全球經濟格局產生的最長遠影響是什麼？", o:["恢復封建莊園","逐漸形成以西方為中心的全球經濟體系","確立亞洲核心貿易","工業中心轉移非洲"], a:1, r:"西方依仗工業優勢，將全球納入其貿易網絡，確立西方主導體系。"},
-    {q:"大量工廠設立，城市範圍擴展，人口持續增長。這種社會結構轉變稱為：", o:["農業化","都市化","莊園化","去工業化"], a:1, r:"人口向城鎮集中、城鎮規模擴大的歷史進程史稱都市化。"},
-    {q:"工業革命期間，哪一項醫學成就成功預防了當時在城鎮廣泛蔓延的烈性傳染病？", o:["盤尼西林","現代麻醉藥","高級抗生素","天花疫苗的應用"], a:3, r:"琴納發明的天花疫苗在十九世紀推廣，成功遏制天花肆虐。"},
-    {q:"因機器與廠房建造費用極高，資本家為了募集龐大資金通常會組織什麼公司？", o:["獨資公司","無限責任會社","家族小工作坊","合股公司"], a:3, r:"合股公司允許向公眾募集資金，有效解決了重工業巨額投資瓶頸。"},
-    {q:"律師、醫生與工程師等群體，主要是憑藉什麼條件立足並被歸為中產階級？", o:["世襲爵位","專門的知識與技術","擁有工廠","朝廷官職"], a:1, r:"技術型中產階級出賣高度專業化的腦力勞動，是工業社會產物。"},
-    {q:"英國政府在法律與政治制度上設立了哪一項保護創新的關鍵制度？", o:["股票制度","關稅壁壘","專利權制度","勞工法例"], a:2, r:"專利保護法規給予發明人壟斷收益，刺激了技術改良。"},
-    {q:"工業革命前，在沒有機器與現代交通的情況下，最主要的遠距離信息傳遞方式是：", o:["郵遞","電報","電話","廣播"], a:0, r:"電磁通訊發明前，信息依賴實體運載工具進行郵遞。"},
-    {q:"工業革命後期，哪些新發現並被廣泛應用的能源提供了更強大動力？", o:["木炭與薪柴","風力與水力","太陽能與核能","石油與電力"], a:3, r:"內燃機與發電機發明使石油和電力成為第二次工業革命核心能源。"},
-    {q:"工業革命前期，紡織業機器主要依靠哪一種改良後的動力打破地理限制？", o:["水力","石油動力","蒸汽力","人力"], a:2, r:"瓦特改良的蒸汽機不受河流位置限制，隨時提供強大動力。"},
-    {q:"西方工業強國透過現代交通網絡，從世界各地主要輸入什麼，加工後輸出製成品？", o:["原材料","機器設備","股票債券","廉價勞工"], a:0, r:"進口便宜原材料，出口高附加值工業製成品是近代貿易基礎模式。"},
-    {q:"資本家擴充生產規模時，可透過合股公司向公眾發行什麼金融工具募集長期資金？", o:["專利權","疫苗","貨幣","債券"], a:3, r:"企業可在金融市場公開發行長期公司債券向大眾舉債集資。"},
-    {q:"資產階級積累驚人財富，底層工人薪酬微薄，這導致歐洲社會出現什麼嚴重問題？", o:["人口大幅減少","科技全面停滯","貧富懸殊","糧食嚴重短缺"], a:2, r:"財富分配極度向資本家傾斜，導致階級貧富差距極度拉大。"},
-    {q:"下列哪些屬於工業革命在歐洲整體興起的時代背景原因？\nI. 歐洲人口增長\nII. 世界貿易與資本積累\nIII. 科學應用", o:["只有 I, II","只有 I, III","只有 II, III","I, II, III"], a:3, r:"人口提供勞力市場，貿易積累資本，科學催生技術革命，三者皆是。"},
-    {q:"關於工業革命前的社會狀況，哪些敘述符合歷史事實？\nI. 多數居民在農村務農\nII. 存在家庭或小型工作坊\nIII. 普遍採用機器流水線", o:["只有 I, II","只有 I, III","只有 II, III","I, II, III"], a:0, r:"機器流水線是工業革命之後才出現的景象，故 III 錯誤。"},
-    {q:"交通運輸範疇的變革包括以下哪些？\nI. 發明蒸汽船與鐵路機車\nII. 大量修築運河與興建鐵路\nIII. 飛機的大規模普及", o:["只有 I, III","只有 I, II","只有 II, III","I, II, III"], a:1, r:"飛機要到二十世紀初才發明，不屬於此時期主要變革。"},
-    {q:"近代資本主義的經濟運作特徵包括哪些？\nI. 私人擁有主要生產資源\nII. 資源完全收歸政府公有\nIII. 將資金投入生產賺取利潤", o:["只有 I, II","只有 II, III","只有 I, III","I, II, III"], a:2, r:"全面收歸公有是社會主義學派主張，資本主義核心是私有與利潤。"},
-    {q:"機器集中生產模式相較於傳統手工業，有哪些顯著轉變？\nI. 場所轉移到集中廠房\nII. 採用新式機器\nIII. 引入分工制", o:["只有 I, II","只有 I, III","只有 II, III","I, II, III"], a:3, r:"集中廠房、機器驅動、專業分工是現代化大工業生產三大核心要素。"},
-    {q:"工業革命後新形成的主要社會階級包括哪些？\nI. 資產階級\nII. 中產階級\nIII. 工人階級\nIV. 封建領主", o:["只有 I, II, III","只有 I, II, IV","只有 I, III, IV","只有 II, III, IV"], a:0, r:"封建領主是舊時代階級，資產、中產和工人是工業社會三大新階級。"},
-    {q:"初期底層工人生活極其困苦的原因包括哪些？\nI. 缺乏保障法例\nII. 工廠缺乏環境衛生投資\nIII. 政府強制無償勞動", o:["只有 I, II","開有 I, III","只有 II, III","I, II, III"], a:0, r:"當時政府未實施社會主義，也無強制無償勞動，主要是放任資本家剝削。"},
-    {q:"「社會主義」學說的核心主張與理念包括哪些？\nI. 生產資源應該歸公有\nII. 財富應該平均分配\nIII. 擴大私人財產取消監管", o:["只有 I, III","只有 II, III","只有 I, II","I, II, III"], a:2, r:"社會主義主張公有化與公平分配，取消監管是極端自由主義。"},
-    {q:"西方列強大肆拓展殖民地的核心動機包括：\nI. 獲取廉價原料\nII. 開拓海外市場\nIII. 協助落後地區獨立", o:["只有 I, III","只有 I, II","只有 II, III","I, II, III"], a:1, r:"殖民是為滿足自身利益，絕非協助當地建立獨立國家。"},
-    {q:"工業革命對世界面貌產生的長遠影響包括哪些？\nI. 國際貿易發展\nII. 西方為中心的經濟體系\nIII. 國際衝突增加局勢緊張", o:["只有 I, II","只有 I, III","只有 II, III","I, II, III"], a:3, r:"生產力狂飆帶來全球化貿易與西方主導，同時也引發強權競爭與戰爭。"}
+    {q:"工業革命時期，人類社會的生產模式發生了根本性轉變，這個時代在歷史上又被稱為什麼？", o:["蒸汽時代","機器時代","資訊時代","鐵器時代"], a:1},
+    {q:"工業革命最先在英國展開，這場變革大約發生在以下哪一個歷史時期？", o:["十七世紀中葉至十八世紀末","十九世紀中葉至二十世紀末","十八世紀中葉至十九世紀中","十八世紀中葉至十九世紀末"], a:3},
+    {q:"在工業革命期間，歐洲各國湧現了大量改變人類生活的重大科技成果。以下哪一組全屬於工業革命時期的發明？", o:["珍妮紡紗機、改良蒸汽機、蒸汽鐵路機車","印刷術、指南針、火藥","網際網路、智慧型手機、核能發電廠","柴油汽車、地鐵列車、飛機"], a:0},
+    {q:"隨著技術變革，歐洲的經濟結構發生重大轉變。這裡所指的「技術變革」核心是指什麼？", o:["機器逐步取代人力、畜力等成為生產動力","莊園制度的解體與自由貿易的普及","行會制度的建立與海外市場的開拓","政府全面接管民間手工藝作坊"], a:0},
+    {q:"「工業化」為歐洲國家帶來了結構性的經濟轉變，其具體表現是：", o:["國家開始依賴海外殖民地提供糧食","商業貿易完全取代了製造業","工業取代了傳統農業成為國家的經濟支柱","金融借貸成為城鎮居民唯一的生計"], a:2},
+    {q:"在工業革命引進機器生產後，相較於歐洲傳統的家庭手工業，這種新興的機器大規模生產具備了什麼最顯著的優勢？", o:["生產過程完全不需要任何原料的投入","產量巨大且生產過程不易受到自然環境限制","能自發保障底層勞工獲得豐厚的工資福利","商品完全由政府定價並實行全國免費配給"], a:1},
+    {q:"十八世紀英國地主收回農民租田並圍築土地，迫使大量失去生計的農民湧入城市，這為當時新興的工廠發展提供了甚麼關鍵元素？", o:["豐富的天然工業原材料","先進的科學理論支持","廣闊的海外銷售市場","充足的廉價勞動力"], a:3},
+    {q:"到了十九世紀初至中葉，工業革命的技術與生產模式開始從英國傳播到以下哪些地區？", o:["其他歐洲國家及美國","亞洲的清朝與日本","非洲中南部與拉丁美洲","大洋洲的澳洲與新西蘭"], a:0},
+    {q:"為了配合工業大量生產後對貨物運送速度的需求，工業革命期間在水路運輸方面出現了什麼重大建設？", o:["修築跨海大橋","建立大型現代化貨櫃碼頭","全面禁止傳統木船航行","大量開鑿運河連接河流"], a:3},
+    {q:"在工業革命後興起的近代經濟體制中，掌握了機器、廠房與礦產等生產資源，並以此僱用勞工賺取利潤的人被稱為：", o:["專業人士","中產階級","資本家","貴族地主"], a:2},
+    {q:"工業生產變革後，為了在最短時間內製造出最多、質素最平均的商品，生產過程普遍採用了什麼運作模式？", o:["師徒制","分工制","世襲制","自由放任制"], a:1},
+    {q:"工業革命後出現了清晰的社會階級劃分。其中新興的教師、記者以及工廠中的管理人員，在當時屬於哪一個階級？", o:["中產階級","資產階級","工人階級","貴族階級"], a:0},
+    {q:"工業革命後，哪一個社會階級因為掌握了巨額財富，甚至能夠在政治上發揮強大的影響力，進而動搖傳統貴族的統治？", o:["中產階級","工人階級","農民階級","資產階級"], a:3},
+    {q:"隨著資產階級與工人階級的矛盾加劇，部份學者開始反對資本家對勞工的剝削，進而提出了什麼新興的政治與經濟主張？", o:["自由主義","民族主義","社會主義","重商主義"], a:2},
+    {q:"十九世紀中葉以後，西方工業強國向海外大肆擴張並奪取殖民地。他們這種擴張行為的最核心目的是甚麼？", o:["傳播西方先進的機器生產技術","獲取生產原料及拓展海外市場","協助亞非兩洲國家發展現代工業","促進世界各國的平等經貿往來"], a:1},
+    {q:"工業革命期間，陸路交通工具出現了革命性的技術突破。當時發明瞭以下哪一種由非生物動力推動的現代鐵道運輸工具？", o:["柴油客車","蒸汽鐵路機車","地鐵列車","馬拉軌道車"], a:1},
+    {q:"十九世紀時，哪一位歷史人物在醫學與公共衛生範疇做出了巨大貢獻，不僅提升了醫院的衛生水平，更創立了護士學校？", o:["歐文","羅伯特·皮爾","南丁格爾","詹姆斯·瓦特"], a:2},
+    {q:"在工業革命帶來的新型工業生產模式下，生產的主要場所發生了什麼轉變？", o:["機器大規模生產取代了傳統的家庭或小型工作坊生產","從大型國營作坊轉為家庭式手工生產","從城市集中生產轉回農村莊園集體勞作","完全依靠海外殖民地的手工作坊供貨"], a:0},
+    {q:"早期工業城鎮缺乏長遠規劃，工廠排放大量濃煙，這導致當時的工業城市普遍面臨什麼嚴重的問題？", o:["勞動力嚴重短缺","土地過度荒廢","糧食生產過剩","嚴重的環境污染與公共衛生惡劣"], a:3},
+    {q:"十九世紀時，有一位德意志思想家公開反對資本家對工人階級的剝削，並與他人合著政治綱領，積極資助反對私有制的理論研究。這位思想家是誰？", o:["恩格斯","詹姆斯·瓦特","南丁格爾","亞當·斯密"], a:0},
+    {q:"到二十世紀初，隨著西方列強在國際經貿與殖民地爭奪上的白熱化，全球局勢出現了什麼發展？", o:["列強達成全面裁軍協議","西方國家自願放棄所有海外殖民地","國際衝突不斷增加，局勢漸趨緊張","全球經貿聯繫完全中斷"], a:2},
+    {q:"工業革命爆發前，歐洲大多數人主要是以什麼方式維持生計？", o:["在城鎮商店經商","在海外從事三角貿易","在礦場採煤","在農村務農"], a:3},
+    {q:"根據反對資本主義剝削的學者理論，要徹底解決工業社會中的貧富懸殊，社會上的財富應該如何處理？", o:["由政府協助全數集中在資產階級手中","依照封建血統與爵位進行重新劃分","平均分配給社會大眾","交由教會進行慈善抽稅後統一保管"], a:2},
+    {q:"到了十九世紀末，工業革命對全球經濟格局產生的最長遠影響是什麼？", o:["恢復了各國自給自足的封建莊園經濟","逐漸形成了一個以西方為中心的全球經濟體系","確立了以亞洲為核心的世界貿易網絡","導致全球工業生產中心完全轉移到非洲"], a:1},
+    {q:"伴隨著大量工廠在城鎮設立，城市範圍不斷擴展，人口持續增長。這種社會結構的轉變在歷史學上被歸納為：", o:["農業化","都市化","莊園化","去工業化"], a:1},
+    {q:"工業革命期間，哪一項醫學上的重大成就成功預防了當時在歐洲城鎮廣泛蔓延的烈性傳染病？", o:["盤尼西林的發明","現代麻醉藥的研發","高級抗生素的普及","天花疫苗的應用"], a:3},
+    {q:"由於大型機器與現代化廠房的建造費用極其高昂，資本家為了募集更龐大的資金，通常會組織什麼型態的公司？", o:["獨資公司","無限責任會社","家族小工作坊","合股公司"], a:3},
+    {q:"在工業革命後的社會中，律師、醫生與工程師等群體，主要是憑藉著什麼條件在社會上立足，並被歸類為中產階級？", o:["世襲的貴族爵位與封地","專門的知識與技術","擁有的工廠與礦產資源","朝廷賞賜的官職"], a:1},
+    {q:"英國能夠成為工業革命的發源地，這與其政府在法律與政治制度上設立了哪一項保護創新的關鍵制度有關？", o:["發行股票募集資金制度","關稅壁壘保護制度","專利權制度","勞工權益保障法例"], a:2},
+    {q:"工業革命前的歐洲，在沒有機器與現代交通工具的情況下，人類最主要的遠距離資訊傳遞方式是：", o:["郵遞","電報","電話","廣播"], a:0},
+    {q:"到了工業革命後期，除了原有的煤炭之外，哪些新發現並被廣泛應用的能源，為工業生產提供了更強大的動力？", o:["木炭與薪柴","風力與水力","太陽能與核能","石油與電力"], a:3},
+    {q:"在工業革命發展的前期，紡織業的機器主要是依靠哪一種改良後的動力來推動，從而打破了地理環境的限制？", o:["水力","石油動力","蒸汽力","人力"], a:2},
+    {q:"西方工業強國透過建立現代交通網絡，從世界各地主要輸入什麼，加工後再向外輸出製成品？", o:["原材料","機器與設備","股票與債券","廉價勞動力"], a:0},
+    {q:"資本家在擴充生產規模時，可以透過合股公司向公眾發行什麼金融工具來募集長期資金？", o:["專利權","疫苗","貨幣","債券"], a:3},
+    {q:"工業革命後，資產階級積累了驚人的財富，而底層工人卻只能拿到微薄的薪酬，這直接導致了當時歐洲社會出現什麼嚴重的問題？", o:["總人口大幅減少","科技全面停滯","貧富懸殊","糧食嚴重短缺"], a:2},
+    {q:"下列哪些屬於工業革命在歐洲整體興起的時代背景原因？\nI. 歐洲人口的快速增長\nII. 世界貿易的發展與商人資本的積累\nIII. 科學的發展及其在生產上的應用", o:["只有 I, II","只有 I, III","只有 II, III","I, II, III"], a:3},
+    {q:"關於工業革命前的歐洲社會生產狀況，以下哪些敘述是符合歷史事實的？\nI. 大多數居民居住在農村並以務農為生\nII. 存在以家庭或小型工作坊為單位的傳統手工業\nIII. 普遍採用由大型機器組編的分工流水線生產", o:["只有 I, II","只有 I, III","只有 II, III","I, II, III"], a:0},
+    {q:"在工業革命期間，交通運輸範疇的變革對經濟發展起到了關鍵作用。這些變革包括以下哪些？\nI. 發明瞭蒸汽船與蒸汽鐵路機車\nII. 大量修築運河與興建鐵路以連接各工業城鎮\nIII. 飛機的大規模普及實現了跨國貨運", o:["只有 I, III","只有 I, II","只有 II, III","I, II, III"], a:1},
+    {q:"工業革命後確立了近代資本主義。關於其經濟運作的特徵，以下哪些描述是正確的？\nI. 私人（資本家）擁有機器、礦產等主要生產資源\nII. 生產資源與工廠完全收歸政府公有與調配\nIII. 將私有財產與資金投入生產，核心目的是賺取利潤", o:["只有 I, II","只有 II, III","只有 I, III","I, II, III"], a:2},
+    {q:"工業革命時期形成的現代機器大規模生產模式，相較於傳統的手工業生產，具有哪些顯著的轉變？\nI. 生產場所從家中轉移到集中管理的大型廠房\nII. 普遍採用新式機器進行大規模的製成品生產\nIII. 生產過程引入分工制以提升產出效率", o:["只有 I, II","只有 I, III","只有 II, III","I, II, III"], a:3},
+    {q:"隨著工業革命發展，社會階級結構發生劇烈震盪。當時新形成的三個主要社會階級包括以下哪些？\nI. 資產階級\nII. 中產階級\nIII. 工人階級\nIV. 封建領主階級", o:["只有 I, II, III","只有 I, II, IV","只有 I, III, IV","只有 II, III, IV"], a:0},
+    {q:"在工業革命初期，底層工人生活極其困苦。導致其苦況的主要原因包括哪些？\nI. 當時缺乏保障勞工權益的法例，工資與工時完全由資本家控制\nII. 工廠制度追求利潤極大化，缺乏對工作環境安全與衛生的投資\nIII. 政府全面實施社會主義，強制規定工人必須無償勞動", o:["只有 I, II","只有 I, III","只有 II, III","I, II, III"], a:0},
+    {q:"面對嚴重的貧富懸殊，部份學者提出了「社會主義」學說。該學說的核心主張與理念包括以下哪些？\nI. 主張生產資源應該歸「公有」而非私人所有\nII. 認為社會上的財富應該平均分配以消滅剝削\nIII. 鼓吹進一步擴大私人財產並取消所有政府監管", o:["只有 I, III","只有 II, III","只有 I, II","I, II, III"], a:2},
+    {q:"在工業革命引發的西方擴張中，西方列強大肆拓展殖民地。他們這樣做的核心動機包括：\nI. 為本土工廠獲取源源不絕的廉價工業生產原料\nII. 為本土大量生產的工業製成品開拓廣闊的海外市場\nIII. 協助外地落後地區儘快建立完全獨立的主權國家", o:["只有 I, III","只有 I, II","只有 II, III","I, II, III"], a:1},
+    {q:"工業革命對整個世界面貌產生的長遠影響包括以下哪些敘述？\nI. 交通與通訊的改良促使國際貿易迅速發展\nII. 一個以西方為中心的全球經濟體系逐漸形成\nIII. 列強因爭奪資源及經謎競爭，導致國際衝突增加、局勢漸趨緊張", o:["只有 I, II","只有 I, III","只有 II, III","I, II, III"], a:3}
 ];
 
+// 老師的 15 題完整填充題庫 (已加入寬容異體字與同義詞判定)
 const allFill = [
-    {q:"英國地主強行收回租田以圍築大片土地經營農牧業，迫使農民湧入城市的歷史運動史稱 ________ 運動。", a:["圈地"], r:"地主圈佔公有地和農民租地轉為大規模高效農場，史稱圈地運動。"},
-    {q:"英國政府為保護發明者權益、鼓勵技術創新設立了特殊的法律保障，這項制度稱為 ________ 制度。", a:["專利權","專利權制度","專利"], r:"專利制度依法保障發明家的商業產權，是促使科技井噴的體制基礎。"},
-    {q:"與恩格斯共同發表綱領、鼓吹武裝推翻資產階級的德意志思想家是 ________。", a:["馬克思"], r:"馬克思與恩格斯共同創立了科學社會主義學說。"},
-    {q:"建立在生產資源私人所有、少數資本家僱用勞工賺取利潤為核心目的的近代經濟體制稱為 ________。", a:["資本主義"], r:"近代西方強國興起的核心經濟體制即是資本主義制度。"},
-    {q:"初期底層工人因工資微薄且無力負擔房租，只能集體居住在環境極其惡劣的 ________。", a:["貧民窟"], r:"過度擁擠、缺乏基礎排污設施的城市邊緣聚居區被稱為貧民窟。"},
-    {q:"為了對抗剝削，工人們自發組織了代表集體權益的常設勞工團體，這種組織稱為 ________。", a:["工會"], r:"工人組織集體工會，透過罷工或集體談判與資產階級博弈。"},
-    {q:"工廠制度為了在最短時間內提高產出效率並確保質素，生產流程中普遍引入了 ________ 制。", a:["分工"], r:"分工制將製造流程拆解，使生產走向標準化與流水線化。"},
-    {q:"馬克思創立的學說，最終目標是消滅私有制，建立勞動階級掌權的社會，該理論稱為 ________。", a:["共產主義"], r:"共產主義主張消滅階級、消滅私有制，實現按需分配的理想社會。"},
-    {q:"在強權擴張下，失去主權、被直接統治並用作原料供應地和商品的海外領土稱為 ________。", a:["殖民地"], r:"殖民地是帝國主義在海外非法吞併、壓榨的主權淪陷地區。"},
-    {q:"工業革命發展前期，新發明的機器及早期推動鐵道與輪船運作的核心生產動力，主要依賴 ________。", a:["蒸汽"], r:"蒸汽動力是第一階段工業革命最核心的圖騰。"},
-    {q:"十九世紀中葉，西方強國在亞非兩洲進行全面擴張、強奪海外利益的傾向，被冠稱為「 ________ 」主義。", a:["新帝國"], r:"以強佔市場和壟斷原料為特徵的強權擴張被稱為新帝國主義。"},
-    {q:"資本家組織合股公司，透過向大眾公開發行 ________ 來募集龐大資金購買機器。", a:["股票"], r:"股票是證明持有者所有權並募集長期社會閒置資金的證券憑證。"},
-    {q:"發展後期，除了石油被廣泛開採，引發第二次技術變革並徹底重塑動力的高效能源是 ________。", a:["電力","電"], r:"發電機成熟令電力全面取代蒸汽，成為現代化核心能源。"},
-    {q:"資本家將機器與工人集中在同一個廠房內，進行集中管理與大規模生產的模式稱為 ________ 制度。", a:["工廠"], r:"資源集中化、規範化、紀律化管理的核心生產體制即工廠制度。"},
-    {q:"農村人口源源不絕遷入，導致城鎮數量與面積出現爆炸性向外擴展的現象史稱 ________。", a:["城市化","都市化"], r:"農村人口向城市集中的地理與社會學轉變史稱城市化或都市化。"}
+    {q:"十八世紀英國地主強行收回租田以圍築大片土地經營農牧業，這場迫使失去土地的農民湧入城市的歷史運動史稱 ________ 運動。", a:["圈地", "圈地運動"]},
+    {q:"英國政府為了保護發明者權益、鼓勵技術創新而設立了特殊的法律保障，這項關鍵的制度稱為 ________ 制度。", a:["專利權", "專利", "專利權制度"]},
+    {q:"在反對資本主義剝削的學派中，與恩格斯共同發表著名政治綱領、鼓吹武裝推翻資產階級的德意志思想家是 ________。", a:["馬克思"]},
+    {q:"這種建立在生產資源私人所有、少數資本家僱用勞工以賺取利潤為核心目的的近代經濟體制，在歷史上稱為 ________。", a:["資本主義", "資本主義制度"]},
+    {q:"工業革命初期城市發展過快，多數底層工人因工資微薄且無力負擔房租，只能集體居住在環境極其惡劣的 ________ 。", a:["貧民窟", "貧民區"]},
+    {q:"為了對抗資產階級的殘酷剝削，工人們自發組織了代表集體權益、試圖爭取改善待遇的常設勞工團體，這種組織稱為 ________。", a:["工會"]},
+    {q:"工廠制度為了在最短時間內提高產出效率並確保產品質素，在生產流程中普遍引入了 ________ 制。", a:["分工", "分工制"]},
+    {q:"馬克思與恩格斯所創立的學說，其最終目標是消滅私有制，建立一個由勞動階級掌權的社會，該理論被正式稱為 ________。", a:["共產主義"]},
+    {q:"在西方強國強權擴張下，亞、非兩洲多個失去主權、被強國直接統治並用作原料供應地和商品的海外領土，稱為 ________。", a:["殖民地"]},
+    {q:"在工業革命發展的前期，新發明的織布機、紡紗機，以及早期推動長途鐵道與輪船運作的核心生產動力，最主要是依賴 ________。", a:["蒸汽", "蒸汽動力"]},
+    {q:"十九世紀中葉，西方強國在亞、非等洲進行全面擴張、強奪海外利益的傾向，在歷史上被冠稱為「 ________ 」主義。", a:["新帝國"]},
+    {q:"資本家組織合股公司，透過向大眾公開發行 ________ 來募集龐大資金，以此購買大型機器並進一步擴大生產規模。", a:["股票"]},
+    {q:"工業革命發展後期，除了石油被廣泛開採外，另一項引發第二次技術變革並徹底重塑工廠照明與動力的高效能源是 ________。", a:["電力", "電"]},
+    {q:"資本家將大量機器與大量工人集中在同一個現代化廠房內，進行集中管理與大規模生產的現代經濟運作模式稱為 ________ 制度。", a:["工廠", "工廠制度"]},
+    {q:"隨著工業城鎮的大量建立，農村人口源源不絕地遷入，進而導致城鎮數量與面積出現爆炸性向外擴展的現象史稱 ________。", a:["城市化", "都市化"]}
 ];
 
 let currentQuiz = [];
@@ -353,15 +185,12 @@ let totalSeconds = 0;
 let timerInterval;
 let timeLeft;
 let questionStartTime;
-
 const studentData = { name: "", class: "" };
 
 function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        let temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
+        let temp = array[i]; array[i] = array[j]; array[j] = temp;
     }
     return array;
 }
@@ -371,59 +200,33 @@ function startGame() {
     const sName = document.getElementById('student-name').value.trim();
     const sPass = document.getElementById('school-pass').value.trim();
     
-    if(!cName || !sName || !sPass) { 
-        showLoginError("⚠️ 所有欄位皆為必填！");
-        return; 
-    }
-    
-    if(sPass !== SCHOOL_PASSWORD) {
-        showLoginError("⚠️ 通關密碼錯誤，請重新輸入！");
-        return;
-    }
+    if(!cName || !sName || !sPass) { alert("⚠️ 所有欄位皆為必填！"); return; }
+    if(sPass !== SCHOOL_PASSWORD) { alert("⚠️ 通關密碼錯誤，請詢問老師！"); return; }
     
     studentData.class = cName;
     studentData.name = sName;
     
-    let selectedMC = shuffle(allMC.slice()).slice(0, 15).map(function(q){ return {q: q.q, o: q.o, a: q.a, r: q.r, type: 0}; });
-    let selectedFill = shuffle(allFill.slice()).slice(0, 5).map(function(q){ return {q: q.q, a: q.a, r: q.r, type: 1}; });
-    
+    // 遊戲機制：隨機抽 15題 MC + 5題 填充
+    let selectedMC = shuffle(allMC.slice()).slice(0, 15).map(function(q){ return {q: q.q, o: q.o, a: q.a, type: 0}; });
+    let selectedFill = shuffle(allFill.slice()).slice(0, 5).map(function(q){ return {q: q.q, a: q.a, type: 1}; });
     currentQuiz = shuffle(selectedMC.concat(selectedFill));
     
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('game-screen').style.display = 'block';
-    
+    document.getElementById('login-screen').classList.add('hide');
+    document.getElementById('game-screen').classList.remove('hide');
     loadQuestion();
 }
 
-function showLoginError(msg) {
-    const btn = document.getElementById('start-btn');
-    btn.innerText = msg; 
-    btn.style.background = "#e74c3c";
-    btn.style.color = "#fff";
-    setTimeout(function() { 
-        btn.innerText = "▶ 開始挑戰"; 
-        btn.style.background = "var(--gold)"; 
-        btn.style.color = "#000";
-    }, 2000);
-}
-
 function loadQuestion() {
-    const ratArea = document.getElementById('rationale-area');
-    const nextBtnArea = document.getElementById('next-btn-area');
+    document.getElementById('rationale-area').style.display = "none";
+    document.getElementById('next-btn-area').style.display = "none";
     const optArea = document.getElementById('options-area');
-    
-    ratArea.style.display = "none";
-    nextBtnArea.style.display = "none";
     optArea.innerHTML = "";
     
-    if(currentIndex >= currentQuiz.length) {
-        endGame();
-        return;
-    }
+    if(currentIndex >= currentQuiz.length) { endGame(); return; }
     
     const qData = currentQuiz[currentIndex];
     document.getElementById('q-counter').innerText = currentIndex + 1;
-    document.getElementById('question-area').innerText = "【第 " + (currentIndex + 1) + " 題】 " + qData.q;
+    document.getElementById('question-area').innerText = "【第 " + (currentIndex + 1) + " 題】\n" + qData.q;
     
     if(qData.type === 0) {
         timeLeft = 30;
@@ -447,11 +250,8 @@ function loadQuestion() {
         
         const subBtn = document.createElement('button');
         subBtn.className = "btn";
-        subBtn.style.marginTop = "15px";
         subBtn.innerText = "提交答案";
         subBtn.onclick = function() { checkFillAnswer(qData); };
-        
-        input.onkeypress = function(e) { if(e.key === 'Enter') checkFillAnswer(qData); };
         
         optArea.appendChild(input);
         optArea.appendChild(document.createElement('br'));
@@ -480,7 +280,7 @@ function updateTimer() {
             const inp = document.getElementById('fill-ans');
             if(inp) inp.disabled = true;
         }
-        showRationale(qData.r, false);
+        showRationale(qData, false);
     }
 }
 
@@ -501,10 +301,10 @@ function checkAnswer(selectedIdx, btnElement, qData) {
         btnElement.classList.add('wrong');
         btns[qData.a].classList.add('correct');
     }
-    showRationale(qData.r, isCorrect);
+    showRationale(qData, isCorrect);
 }
 
-// 【修復核心】：超級寬容的填充題比對法，確保不會誤判
+// 超強防呆填充題比對邏輯
 function checkFillAnswer(qData) {
     const input = document.getElementById('fill-ans');
     const rawUserAns = input.value;
@@ -515,13 +315,8 @@ function checkFillAnswer(qData) {
     totalSeconds += timeUsed;
     
     input.disabled = true;
-    const btns = document.getElementById('options-area').getElementsByTagName('button');
-    for(let i = 0; i < btns.length; i++) btns[i].disabled = true;
     
-    // 強制統一轉為小寫並移除所有空格與各種括號
     let standardizedUser = rawUserAns.replace(/[\s\(\)（）]/g, "").toLowerCase();
-    
-    // 確保後台答案被正確當作「陣列」處理，而非單一字串
     let validAnswers = Array.isArray(qData.a) ? qData.a : [qData.a];
     let isCorrect = false;
     
@@ -541,16 +336,24 @@ function checkFillAnswer(qData) {
     } else {
         input.style.backgroundColor = "var(--wrong)";
         input.style.color = "#fff";
-        input.value = "答錯！正解應為: " + validAnswers[0];
+        input.value = "答錯！正解: " + validAnswers[0];
     }
-    showRationale(qData.r, isCorrect);
+    showRationale(qData, isCorrect);
 }
 
-function showRationale(text, isCorrect) {
+function showRationale(qData, isCorrect) {
     const ratArea = document.getElementById('rationale-area');
     ratArea.style.display = "block";
     ratArea.style.backgroundColor = isCorrect ? "#27ae60" : "#c0392b";
-    ratArea.innerHTML = "<strong>💡 歷史解說：</strong> " + text;
+    
+    let correctText = "";
+    if (qData.type === 0) {
+        correctText = qData.o[qData.a];
+    } else {
+        correctText = Array.isArray(qData.a) ? qData.a[0] : qData.a;
+    }
+    
+    ratArea.innerHTML = "<strong>💡 歷史解說：</strong> 本題正確答案為「" + correctText + "」。";
     document.getElementById('next-btn-area').style.display = "block";
 }
 
@@ -560,11 +363,10 @@ function loadNextQuestion() {
 }
 
 function endGame() {
-    document.getElementById('game-screen').style.display = 'none';
-    document.getElementById('result-screen').style.display = 'block';
+    document.getElementById('game-screen').classList.add('hide');
+    document.getElementById('result-screen').classList.remove('hide');
     
     const finalSec = Math.round(totalSeconds);
-    
     document.getElementById('cert-name').innerText = studentData.name;
     document.getElementById('cert-class').innerText = studentData.class;
     document.getElementById('cert-score').innerText = score;
@@ -573,49 +375,42 @@ function endGame() {
     uploadScore(studentData.class, studentData.name, score, finalSec);
 }
 
+// 無縫上傳成績機制
 function uploadScore(classStr, name, score, time) {
-    const payload = {
-        gameTitle: GAME_TITLE,
-        classStr: classStr,
-        name: name,
-        score: score,
-        time: time
-    };
+    const payload = { gameTitle: GAME_TITLE, classStr: classStr, name: name, score: score, time: time };
 
     fetch(CLOUD_URL, {
         method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
+        mode: "no-cors", 
+        headers: { "Content-Type": "text/plain" },
         body: JSON.stringify(payload)
     })
     .then(function() {
-        document.getElementById('upload-status').innerText = "✅ 成績已成功安全寫入雲端母表！";
+        document.getElementById('upload-status').innerText = "✅ 成績已成功同步！正在載入排行榜...";
         document.getElementById('upload-status').style.color = "var(--correct)";
-        // 延遲1秒再抓取，確保成績已經被寫進 Google 試算表
-        setTimeout(fetchLeaderboard, 1000); 
+        setTimeout(fetchLeaderboard, 1500); 
     })
     .catch(function(err) {
-        document.getElementById('upload-status').innerText = "⚠️ 成績同步異常，但仍可複製證書。";
+        document.getElementById('upload-status').innerText = "⚠️ 網路同步失敗，請點擊複製成績手動繳交。";
         document.getElementById('upload-status').style.color = "var(--wrong)";
-        console.error(err);
     });
 }
 
-// 【修復核心】：突破阻擋，使用跨網域 JSONP 獲取真實排行榜資料
+// 突破防線的 JSONP 排行榜抓取
 function fetchLeaderboard() {
-    const tbody = document.getElementById('leaderboard-body');
-    tbody.innerHTML = "<tr><td colspan='5'>正在載入最新排名...</td></tr>";
-
-    // 建立一個獨特的呼叫名稱
-    const callbackName = "jsonp_callback_" + Math.round(100000 * Math.random());
+    const script = document.createElement('script');
+    const callbackName = "showLeaderboard_" + Math.round(Math.random() * 1000000);
     
-    // 當抓到資料時，系統會自動執行這一段繪製表格
     window[callbackName] = function(data) {
+        const tbody = document.getElementById('leaderboard-body');
         tbody.innerHTML = "";
-        if(!data || data.length === 0) {
+        
+        if (data.error) {
+            tbody.innerHTML = "<tr><td colspan='5' style='color:var(--wrong);'>⚠️ " + data.error + "</td></tr>";
+        } else if (!data || data.length === 0) {
             tbody.innerHTML = "<tr><td colspan='5'>目前暫無排名，你就是第一位挑戰者！</td></tr>";
         } else {
-            for(let i = 0; i < Math.min(data.length, 10); i++) {
+            for (let i = 0; i < data.length; i++) {
                 let tr = document.createElement('tr');
                 let rankClass = (i < 3) ? "top-rank" : "";
                 tr.innerHTML = "<td class='" + rankClass + "'>" + (i + 1) + "</td>" +
@@ -627,28 +422,17 @@ function fetchLeaderboard() {
             }
         }
         delete window[callbackName];
-        document.getElementById(callbackName).remove();
+        script.remove();
     };
 
-    // 發射隱形指令給 Google Apps Script
-    const script = document.createElement('script');
-    script.id = callbackName;
     script.src = CLOUD_URL + "?gameTitle=" + encodeURIComponent(GAME_TITLE) + "&callback=" + callbackName;
     document.body.appendChild(script);
-    
-    // 預防萬一 Google 當機，8 秒後顯示超時警告
-    setTimeout(() => {
-        if(window[callbackName]) {
-            tbody.innerHTML = "<tr><td colspan='5' style='color:var(--wrong);'>⚠️ 無法載入排行榜，請重新整理網頁</td></tr>";
-            delete window[callbackName];
-        }
-    }, 8000);
 }
 
 function copyResult() {
     const text = "🏆 " + GAME_TITLE + "歷史挑戰賽成績\n姓名：" + studentData.class + " " + studentData.name + "\n得分：" + score + " 分\n耗時：" + Math.round(totalSeconds) + " 秒";
     navigator.clipboard.writeText(text).then(function() {
-        alert("✅ 成績已複製！您可以直接貼到 Google Classroom 回報給老師囉！");
+        alert("✅ 成績已複製！您可以直接至 Google Classroom 貼上交功課。");
     }).catch(function(err) {
         alert("無法自動複製，請手動圈選上方證書文字進行複製。");
     });
